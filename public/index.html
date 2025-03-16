@@ -2,6 +2,7 @@
 <html lang="de">
     <head>
         <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
         <title>Tank.io</title>
         <style>
             body {
@@ -386,6 +387,129 @@
                 justify-content: center;
                 align-items: center;
             }
+
+            /* Mobile Steuerung */
+            .mobile-controls {
+                display: none; /* Standardmäßig ausgeblendet */
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                width: 100%;
+                height: 40%;
+                z-index: 100;
+                pointer-events: none; /* Erlaubt Events, die durch diese Ebene gehen */
+            }
+
+            .joystick-area {
+                position: absolute;
+                bottom: 20px;
+                left: 20px;
+                width: 150px;
+                height: 150px;
+                background-color: rgba(255, 255, 255, 0.1);
+                border-radius: 50%;
+                pointer-events: auto; /* Fängt Events ab */
+                touch-action: none; /* Verhindert Standard-Touch-Aktionen */
+            }
+
+            .joystick-thumb {
+                position: absolute;
+                width: 60px;
+                height: 60px;
+                background-color: rgba(255, 255, 255, 0.4);
+                border-radius: 50%;
+                left: 45px;
+                top: 45px;
+                pointer-events: none; /* Ignoriert Events */
+            }
+
+            .fire-area {
+                position: absolute;
+                bottom: 20px;
+                right: 20px;
+                width: 150px;
+                height: 150px;
+                background-color: rgba(255, 255, 255, 0.1);
+                border-radius: 50%;
+                pointer-events: auto; /* Fängt Events ab */
+                touch-action: none; /* Verhindert Standard-Touch-Aktionen */
+            }
+
+            .fire-button {
+                position: absolute;
+                width: 60px;
+                height: 60px;
+                background-color: rgba(255, 0, 0, 0.4);
+                border-radius: 50%;
+                left: 45px;
+                top: 45px;
+                pointer-events: auto; /* Fängt Events ab */
+            }
+
+            .fire-lines {
+                position: absolute;
+                width: 100%;
+                height: 100%;
+                border-radius: 50%;
+            }
+
+            .fire-lines::before,
+            .fire-lines::after {
+                content: '';
+                position: absolute;
+                background-color: rgba(255, 255, 255, 0.5);
+            }
+
+            .fire-lines::before {
+                width: 2px;
+                height: 100%;
+                left: 50%;
+                top: 0;
+                transform: translateX(-50%);
+            }
+
+            .fire-lines::after {
+                width: 100%;
+                height: 2px;
+                left: 0;
+                top: 50%;
+                transform: translateY(-50%);
+            }
+
+            /* Für Tablets und größere Bildschirme anpassen */
+            @media (min-width: 768px) and (max-width: 1024px) {
+                .joystick-area, .fire-area {
+                    width: 120px;
+                    height: 120px;
+                }
+                
+                .joystick-thumb {
+                    width: 50px;
+                    height: 50px;
+                    left: 35px;
+                    top: 35px;
+                }
+            }
+
+            /* Verhindern des Scrollens auf mobilen Geräten */
+            html, body {
+                position: fixed;
+                overflow: hidden;
+                width: 100%;
+                height: 100%;
+            }
+
+            /* Für den Tod-Bildschirm: Steuerungen ausblenden */
+            .controls-hidden .mobile-controls {
+                display: none !important;
+            }
+
+            /* XP-Bar Anpassung für mobile Geräte */
+            @media (max-width: 767px) {
+                #xp-bar-container {
+                    bottom: 180px;
+                }
+            }
         </style>
     </head>
     <body>
@@ -557,6 +681,17 @@
 
             <div style="text-align: center; margin-top: 15px;">
                 <button id="admin-close-btn" style="background: #e74c3c; color: white; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer;">Schließen</button>
+            </div>
+        </div>
+
+        <!-- Mobile Steuerung -->
+        <div class="mobile-controls" id="mobile-controls">
+            <div class="joystick-area" id="joystick-area">
+                <div class="joystick-thumb" id="joystick-thumb"></div>
+            </div>
+            <div class="fire-area" id="fire-area">
+                <div class="fire-lines"></div>
+                <div class="fire-button" id="fire-button"></div>
             </div>
         </div>
 
@@ -2140,6 +2275,208 @@
                         })
                     );
                 }
+            });
+
+            // Mobile Steuerung einrichten
+            function setupMobileControls() {
+                const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 767;
+                const mobileControls = document.getElementById('mobile-controls');
+                
+                if (!isMobile) {
+                    mobileControls.style.display = 'none';
+                    return; // Wenn kein Mobilgerät, nichts weiter tun
+                }
+                
+                console.log("Mobilgerät erkannt, aktiviere Touch-Steuerung");
+                mobileControls.style.display = 'block';
+                
+                // Joystick-Elemente
+                const joystickArea = document.getElementById('joystick-area');
+                const joystickThumb = document.getElementById('joystick-thumb');
+                const fireArea = document.getElementById('fire-area');
+                const fireButton = document.getElementById('fire-button');
+                
+                // Joystick-Variablen
+                let joystickActive = false;
+                let joystickStartPos = { x: 0, y: 0 };
+                let joystickCurrentPos = { x: 0, y: 0 };
+                let moveVector = { dx: 0, dy: 0 };
+                
+                // Feuer-Variablen
+                let firingActive = false;
+                let fireStartPos = { x: 0, y: 0 };
+                let aimAngle = 0;
+                let shootingInterval = null;
+                
+                // Joystick-Events
+                joystickArea.addEventListener('touchstart', function(e) {
+                    e.preventDefault();
+                    joystickActive = true;
+                    
+                    const touch = e.touches[0];
+                    const rect = joystickArea.getBoundingClientRect();
+                    joystickStartPos.x = rect.left + rect.width / 2;
+                    joystickStartPos.y = rect.top + rect.height / 2;
+                    joystickCurrentPos.x = touch.clientX;
+                    joystickCurrentPos.y = touch.clientY;
+                    
+                    updateJoystickPosition();
+                });
+                
+                joystickArea.addEventListener('touchmove', function(e) {
+                    e.preventDefault();
+                    if (!joystickActive) return;
+                    
+                    const touch = e.touches[0];
+                    joystickCurrentPos.x = touch.clientX;
+                    joystickCurrentPos.y = touch.clientY;
+                    
+                    updateJoystickPosition();
+                });
+                
+                joystickArea.addEventListener('touchend', function(e) {
+                    e.preventDefault();
+                    joystickActive = false;
+                    
+                    // Zurücksetzen der Position
+                    joystickThumb.style.left = '45px';
+                    joystickThumb.style.top = '45px';
+                    
+                    // Bewegung stoppen
+                    moveVector.dx = 0;
+                    moveVector.dy = 0;
+                });
+                
+                // Feuer-Bereich-Events
+                fireArea.addEventListener('touchstart', function(e) {
+                    e.preventDefault();
+                    firingActive = true;
+                    
+                    const touch = e.touches[0];
+                    const rect = fireArea.getBoundingClientRect();
+                    fireStartPos.x = rect.left + rect.width / 2;
+                    fireStartPos.y = rect.top + rect.height / 2;
+                    
+                    updateFireButtonPosition(touch);
+                    
+                    // Sofort ersten Schuss abfeuern
+                    if (socket && player) {
+                        socket.emit("shoot");
+                    }
+                    
+                    // Kontinuierliches Schießen starten
+                    shootingInterval = setInterval(() => {
+                        if (firingActive && socket && player) {
+                            socket.emit("shoot");
+                        }
+                    }, 200); // Alle 200ms schießen
+                });
+                
+                fireArea.addEventListener('touchmove', function(e) {
+                    e.preventDefault();
+                    if (!firingActive) return;
+                    
+                    const touch = e.touches[0];
+                    updateFireButtonPosition(touch);
+                });
+                
+                fireArea.addEventListener('touchend', function(e) {
+                    e.preventDefault();
+                    firingActive = false;
+                    
+                    // Feuerknopf zurücksetzen
+                    fireButton.style.left = '45px';
+                    fireButton.style.top = '45px';
+                    
+                    // Schießen stoppen
+                    if (shootingInterval) {
+                        clearInterval(shootingInterval);
+                        shootingInterval = null;
+                    }
+                });
+                
+                // Bewegungsvektor regelmäßig senden
+                setInterval(() => {
+                    if (player && socket && (moveVector.dx !== 0 || moveVector.dy !== 0)) {
+                        socket.emit("move", moveVector);
+                    }
+                }, 33); // ~30 mal pro Sekunde
+                
+                // Hilfsfunktionen
+                function updateJoystickPosition() {
+                    const deltaX = joystickCurrentPos.x - joystickStartPos.x;
+                    const deltaY = joystickCurrentPos.y - joystickStartPos.y;
+                    const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+                    const maxDistance = joystickArea.clientWidth / 2 - joystickThumb.clientWidth / 2;
+                    
+                    let thumbX, thumbY;
+                    
+                    if (distance > maxDistance) {
+                        const angle = Math.atan2(deltaY, deltaX);
+                        thumbX = Math.cos(angle) * maxDistance + joystickArea.clientWidth / 2 - joystickThumb.clientWidth / 2;
+                        thumbY = Math.sin(angle) * maxDistance + joystickArea.clientHeight / 2 - joystickThumb.clientHeight / 2;
+                    } else {
+                        thumbX = deltaX + joystickArea.clientWidth / 2 - joystickThumb.clientWidth / 2;
+                        thumbY = deltaY + joystickArea.clientHeight / 2 - joystickThumb.clientHeight / 2;
+                    }
+                    
+                    joystickThumb.style.left = thumbX + 'px';
+                    joystickThumb.style.top = thumbY + 'px';
+                    
+                    // Bewegungsvektor berechnen (-1 bis 1 für beide Achsen)
+                    moveVector.dx = Math.min(Math.max(deltaX / maxDistance, -1), 1);
+                    moveVector.dy = Math.min(Math.max(deltaY / maxDistance, -1), 1);
+                }
+                
+                function updateFireButtonPosition(touch) {
+                    const rect = fireArea.getBoundingClientRect();
+                    const centerX = rect.left + rect.width / 2;
+                    const centerY = rect.top + rect.height / 2;
+                    
+                    const deltaX = touch.clientX - centerX;
+                    const deltaY = touch.clientY - centerY;
+                    
+                    // Winkel zum Server senden (für die Rotation der Kanone)
+                    aimAngle = Math.atan2(deltaY, deltaX);
+                    if (socket && player) {
+                        socket.emit("rotate", aimAngle);
+                    }
+                    
+                    // Nur den Zielpunkt visualisieren, nicht den Button verschieben
+                    // für ein besseres Spielgefühl
+                }
+                
+                // Ereignisse für Tod-Bildschirm
+                socket.on('died', function() {
+                    document.body.classList.add('controls-hidden');
+                });
+                
+                // Ereignislistener für Continue-Button
+                document.getElementById('death-continue-btn').addEventListener('click', function() {
+                    document.body.classList.remove('controls-hidden');
+                });
+                
+                // Vollbild anfordern für ein besseres Spielerlebnis auf Mobilgeräten
+                document.addEventListener('click', function requestFullScreen() {
+                    const elem = document.documentElement;
+                    if (elem.requestFullscreen) {
+                        elem.requestFullscreen();
+                    } else if (elem.mozRequestFullScreen) { /* Firefox */
+                        elem.mozRequestFullScreen();
+                    } else if (elem.webkitRequestFullscreen) { /* Chrome, Safari & Opera */
+                        elem.webkitRequestFullscreen();
+                    } else if (elem.msRequestFullscreen) { /* IE/Edge */
+                        elem.msRequestFullscreen();
+                    }
+                    document.removeEventListener('click', requestFullScreen);
+                }, { once: true });
+            }
+
+            // Mobil-Steuerung nach dem Starten des Spiels einrichten
+            document.addEventListener('DOMContentLoaded', function() {
+                // Das Spiel wird bereits durch startGame() gestartet
+                // Wir richten die Mobilsteuerung nach dem Laden der Seite ein
+                setupMobileControls();
             });
         </script>
     </body>
