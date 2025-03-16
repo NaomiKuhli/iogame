@@ -1,0 +1,2146 @@
+<!doctype html>
+<html lang="de">
+    <head>
+        <meta charset="UTF-8" />
+        <title>Tank.io</title>
+        <style>
+            body {
+                margin: 0;
+                padding: 0;
+                font-family: Arial, sans-serif;
+                overflow: hidden;
+            }
+
+            #loading {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: white;
+                padding: 20px;
+                border-radius: 10px;
+                font-size: 24px;
+                z-index: 5;
+            }
+
+            canvas {
+                display: block;
+            }
+
+            #minimap-container {
+                position: absolute;
+                top: 10px;
+                left: 10px;
+                background: rgba(0, 0, 0, 0.2);
+                padding: 5px;
+                border-radius: 5px;
+            }
+
+            #debug-info {
+                position: absolute;
+                bottom: 10px;
+                left: 10px;
+                background: rgba(0, 0, 0, 0.6);
+                color: white;
+                padding: 5px 10px;
+                border-radius: 5px;
+                font-size: 12px;
+                display: none;
+            }
+
+            /* Leaderboard Styling */
+            #leaderboard {
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                width: 200px;
+                background: rgba(0, 0, 0, 0.5);
+                border-radius: 5px;
+                padding: 8px;
+                color: white;
+            }
+
+            .leaderboard-title {
+                text-align: center;
+                margin-top: 0;
+                margin-bottom: 5px;
+                font-size: 16px;
+            }
+
+            .leaderboard-item {
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 3px;
+                font-size: 13px;
+            }
+
+            .leaderboard-name {
+                max-width: 120px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+            .crown {
+                color: gold;
+                margin-right: 5px;
+            }
+
+            /* XP-Bar Styling (Diep.io Style) */
+            #xp-bar-container {
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                width: 100%;
+                height: 24px;
+                background: none; /* Entferne den schwarzen Hintergrund */
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            #xp-bar-wrapper {
+                width: 60%;
+                height: 16px;
+                background: rgba(0, 0, 0, 0.4);
+                border-radius: 8px;
+                overflow: hidden;
+                position: relative;
+            }
+
+            #xp-bar {
+                height: 100%;
+                width: 0%;
+                background: linear-gradient(to bottom, #4CAF50, #2E7D32);
+                transition: width 0.3s ease;
+            }
+
+            #xp-text {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                font-size: 12px;
+                font-weight: bold;
+                text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+            }
+
+            #particle-canvas {
+                position: absolute;
+                top: 0;
+                left: 0;
+                pointer-events: none;
+                z-index: 10;
+            }
+
+            /* NEUE STYLE-REGELN FÜR UPGRADES UND UI */
+            .level-number {
+                display: inline-block;
+                background-color: #3498db;
+                color: white;
+                font-size: 11px;
+                width: 18px;
+                height: 18px;
+                line-height: 18px;
+                text-align: center;
+                border-radius: 9px;
+                margin-left: 5px;
+                font-weight: bold;
+            }
+
+            /* Farbverlauf für die Upgrade-Balken */
+            .level-filled {
+                height: 100%;
+                background: linear-gradient(to right, #3498db, #2ecc71);
+                border-radius: 5px;
+                transition: width 0.3s ease;
+            }
+
+            /* Verbesserte Upgrade-Buttons */
+            .upgrade-button {
+                width: 30px;
+                height: 20px;
+                line-height: 20px;
+                text-align: center;
+                background: #3498db;
+                border-radius: 3px;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+            }
+
+            .upgrade-button:hover {
+                background: #2980b9;
+                transform: scale(1.05);
+            }
+
+            .upgrade-button.disabled {
+                background: #555;
+                cursor: not-allowed;
+                box-shadow: none;
+                transform: none;
+            }
+
+            /* Verbessertes Upgrade-Item */
+            .upgrade-item {
+                margin-bottom: 8px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 3px;
+                border-radius: 4px;
+                transition: background-color 0.2s ease;
+            }
+
+            .upgrade-item:hover {
+                background-color: rgba(255, 255, 255, 0.1);
+            }
+
+            .upgrade-name {
+                display: inline-block;
+                width: 130px;
+                font-size: 14px;
+            }
+
+            /* Verbesserte Level-Leiste */
+            .level-indicator {
+                display: inline-block;
+                width: 70px;
+                height: 10px;
+                background: #333;
+                margin-right: 10px;
+                border-radius: 5px;
+                overflow: hidden;
+                box-shadow: inset 0 1px 3px rgba(0,0,0,0.3);
+            }
+
+            /* Verbessertes Upgrade-Menü */
+            #upgrade-menu {
+                position: absolute;
+                left: 10px;
+                bottom: 10px;
+                width: 240px;
+                background: rgba(0, 0, 0, 0.7);
+                border-radius: 10px;
+                padding: 12px;
+                color: white;
+                display: none;
+                font-size: 13px;
+                backdrop-filter: blur(5px);
+                box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+                border: 1px solid rgba(255,255,255,0.1);
+            }
+
+            #upgrade-status {
+                margin-top: 10px;
+                font-size: 12px;
+                text-align: center;
+                padding: 4px;
+                background: rgba(0,0,0,0.2);
+                border-radius: 4px;
+            }
+
+            /* Death screen (Diep.io Style) */
+            #death-screen {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 1000;
+                display: none;
+            }
+
+            #death-screen .death-content {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                text-align: center;
+                color: white;
+            }
+
+            #death-title {
+                font-size: 26px;
+                margin-bottom: 5px;
+            }
+
+            #death-killer {
+                font-size: 32px;
+                color: #f39c12;
+                margin-top: 5px;
+                margin-bottom: 15px;
+            }
+
+            #death-stats {
+                background: rgba(0, 0, 0, 0.6);
+                padding: 20px;
+                border-radius: 10px;
+                margin-bottom: 20px;
+            }
+
+            .death-stat-row {
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 10px;
+            }
+
+            .death-stat-label, .death-stat-value {
+                font-weight: bold;
+                font-size: 18px;
+            }
+
+            #death-achievement {
+                display: none;
+                background: rgba(231, 76, 60, 0.8);
+                padding: 10px;
+                border-radius: 8px;
+                margin-bottom: 20px;
+            }
+
+            #death-achievement-title {
+                font-weight: bold;
+                font-size: 16px;
+                margin-bottom: 5px;
+            }
+
+            #death-continue-btn {
+                background: #3498db;
+                border: none;
+                color: white;
+                padding: 10px 30px;
+                font-size: 18px;
+                border-radius: 5px;
+                cursor: pointer;
+                transition: background 0.2s;
+            }
+
+            #death-continue-btn:hover {
+                background: #2980b9;
+            }
+
+            /* Styling für Missionen im Death Screen */
+            .death-mission-item {
+                background: rgba(0, 0, 0, 0.3);
+                padding: 8px 12px;
+                margin-bottom: 8px;
+                border-radius: 5px;
+                text-align: left;
+            }
+
+            .death-mission-progress {
+                display: flex;
+                align-items: center;
+                margin-top: 5px;
+            }
+
+            .death-mission-bar {
+                flex-grow: 1;
+                height: 8px;
+                background: rgba(0, 0, 0, 0.4);
+                border-radius: 4px;
+                margin-right: 10px;
+                overflow: hidden;
+            }
+
+            .death-mission-fill {
+                height: 100%;
+                background: #3498db;
+                width: 0%;
+            }
+
+            .death-mission-complete .death-mission-fill {
+                background: #2ecc71;
+            }
+
+            .death-mission-status {
+                font-size: 12px;
+                color: white;
+                min-width: 60px;
+                text-align: right;
+            }
+
+            .death-mission-reward {
+                color: gold;
+                font-weight: bold;
+            }
+
+            /* Coins-Anzeige im Death Screen */
+            .coin-icon {
+                color: gold;
+                margin-right: 5px;
+            }
+
+            .death-coins-earned {
+                color: #f1c40f;
+                font-size: 24px;
+                font-weight: bold;
+                margin: 15px 0;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="loading">Spiel wird geladen...</div>
+        <canvas id="game-canvas"></canvas>
+        <canvas id="particle-canvas"></canvas>
+        <div id="minimap-container">
+            <canvas id="minimap-canvas" width="150" height="150" style="border: 1px solid #fff"></canvas>
+        </div>
+        <div id="debug-info"></div>
+
+        <!-- Leaderboard -->
+        <div id="leaderboard">
+            <h3 class="leaderboard-title">Leaderboard</h3>
+            <div id="leaderboard-items">
+                <!-- Wird dynamisch befüllt -->
+            </div>
+            <div id="players-count" style="text-align: right; margin-top: 2px; font-size: 10px; color: #aaa;">Spieler: 1</div>
+        </div>
+
+        <!-- XP-Bar (Diep.io Style) -->
+        <div id="xp-bar-container">
+            <div id="xp-bar-wrapper">
+                <div id="xp-bar"></div>
+                <div id="xp-text">Level 1 - 0/30 XP</div>
+            </div>
+        </div>
+
+        <!-- Upgrade-Menü mit verbesserten Level-Anzeigen -->
+        <div id="upgrade-menu">
+            <h3 style="margin-top: 0; text-align: center;">Upgrades</h3>
+            <div class="upgrade-item">
+                <span class="upgrade-name">Health Regen <span class="level-number" id="healthRegen-number">1</span></span>
+                <div class="level-indicator"><div class="level-filled" id="healthRegen-level" style="width: 10%;"></div></div>
+                <div class="upgrade-button" id="healthRegen-btn">+</div>
+            </div>
+            <div class="upgrade-item">
+                <span class="upgrade-name">Max Health <span class="level-number" id="maxHealth-number">1</span></span>
+                <div class="level-indicator"><div class="level-filled" id="maxHealth-level" style="width: 10%;"></div></div>
+                <div class="upgrade-button" id="maxHealth-btn">+</div>
+            </div>
+            <div class="upgrade-item">
+                <span class="upgrade-name">Body Damage <span class="level-number" id="bodyDamage-number">1</span></span>
+                <div class="level-indicator"><div class="level-filled" id="bodyDamage-level" style="width: 10%;"></div></div>
+                <div class="upgrade-button" id="bodyDamage-btn">+</div>
+            </div>
+            <div class="upgrade-item">
+                <span class="upgrade-name">Bullet Speed <span class="level-number" id="bulletSpeed-number">1</span></span>
+                <div class="level-indicator"><div class="level-filled" id="bulletSpeed-level" style="width: 10%;"></div></div>
+                <div class="upgrade-button" id="bulletSpeed-btn">+</div>
+            </div>
+            <div class="upgrade-item">
+                <span class="upgrade-name">Bullet Penetration <span class="level-number" id="bulletPenetration-number">1</span></span>
+                <div class="level-indicator"><div class="level-filled" id="bulletPenetration-level" style="width: 10%;"></div></div>
+                <div class="upgrade-button" id="bulletPenetration-btn">+</div>
+            </div>
+            <div class="upgrade-item">
+                <span class="upgrade-name">Bullet Damage <span class="level-number" id="bulletDamage-number">1</span></span>
+                <div class="level-indicator"><div class="level-filled" id="bulletDamage-level" style="width: 10%;"></div></div>
+                <div class="upgrade-button" id="bulletDamage-btn">+</div>
+            </div>
+            <div class="upgrade-item">
+                <span class="upgrade-name">Reload <span class="level-number" id="reload-number">1</span></span>
+                <div class="level-indicator"><div class="level-filled" id="reload-level" style="width: 10%;"></div></div>
+                <div class="upgrade-button" id="reload-btn">+</div>
+            </div>
+            <div class="upgrade-item">
+                <span class="upgrade-name">Movement Speed <span class="level-number" id="movementSpeed-number">1</span></span>
+                <div class="level-indicator"><div class="level-filled" id="movementSpeed-level" style="width: 10%;"></div></div>
+                <div class="upgrade-button" id="movementSpeed-btn">+</div>
+            </div>
+            <div id="upgrade-status">Verfügbare Punkte: 0 | Upgrades: 0/45</div>
+        </div>
+
+        <!-- NEU: Death Screen (Diep.io Style) -->
+        <div id="death-screen">
+            <div class="death-content">
+                <h2 id="death-title">You were killed by</h2>
+                <h1 id="death-killer">Unknown</h1>
+
+                <div id="death-stats">
+                    <div class="death-stat-row">
+                        <span class="death-stat-label">Score:</span>
+                        <span class="death-stat-value" id="death-score">0</span>
+                    </div>
+                    <div class="death-stat-row">
+                        <span class="death-stat-label">Level:</span>
+                        <span class="death-stat-value" id="death-level">1</span>
+                    </div>
+                    <div class="death-stat-row">
+                        <span class="death-stat-label">Time:</span>
+                        <span class="death-stat-value" id="death-time">0s</span>
+                    </div>
+                </div>
+
+                <div class="death-coins-earned" id="death-coins-display" style="display: none;">
+                    <span class="coin-icon">💰</span>
+                    <span id="death-coins">0</span> Coins verdient
+                </div>
+
+                <div id="death-missions" style="display: none;">
+                    <h3 style="margin-bottom: 10px;">Tägliche Missionen</h3>
+                    <div id="death-missions-list" style="max-height: 200px; overflow-y: auto;">
+                        <!-- Wird dynamisch befüllt -->
+                    </div>
+                </div>
+
+                <div id="death-achievement">
+                    <div id="death-achievement-title">Achievement Unlocked!</div>
+                    <div id="death-achievement-text">Ran into something</div>
+                </div>
+
+                <button id="death-continue-btn">Continue</button>
+            </div>
+        </div>
+
+        <!-- Admin-Menü hinzufügen -->
+        <div id="admin-password-dialog" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0, 0, 0, 0.8); padding: 20px; border-radius: 10px; z-index: 1000; color: white; text-align: center; box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);">
+            <h3>Admin-Zugriff</h3>
+            <input type="password" id="admin-password" placeholder="Passwort eingeben" style="margin: 10px 0; padding: 8px; width: 200px; border-radius: 4px; border: none;">
+            <div>
+                <button id="admin-login-btn" style="background: #3498db; color: white; border: none; padding: 8px 15px; margin-right: 10px; border-radius: 4px; cursor: pointer;">Anmelden</button>
+                <button id="admin-cancel-btn" style="background: #e74c3c; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer;">Abbrechen</button>
+            </div>
+        </div>
+
+        <div id="admin-panel" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0, 0, 0, 0.85); padding: 20px; border-radius: 10px; z-index: 1000; color: white; width: 600px; height: 400px; box-shadow: 0 0 30px rgba(0, 0, 0, 0.7);">
+            <h2 style="text-align: center; margin-top: 0;">Admin Panel</h2>
+
+            <div style="display: flex; height: calc(100% - 60px);">
+                <!-- Linke Seite - Spieler-Liste und Kontrollen -->
+                <div style="flex: 1; padding-right: 10px; border-right: 1px solid #555; overflow-y: auto;">
+                    <h3>Spieler</h3>
+                    <div id="admin-players-list" style="margin-bottom: 15px; max-height: 150px; overflow-y: auto;">
+                        <!-- Wird dynamisch befüllt -->
+                    </div>
+
+                    <div style="margin-top: 15px;">
+                        <h3>Aktionen</h3>
+                        <div style="margin-bottom: 10px;">
+                            <label for="admin-level-input">Level geben:</label>
+                            <input type="number" id="admin-level-input" value="1" min="1" max="100" style="width: 60px; margin-left: 5px;">
+                            <button id="admin-give-level-btn" style="background: #2ecc71; color: white; border: none; padding: 5px 10px; margin-left: 5px; border-radius: 4px; cursor: pointer;">Geben</button>
+                        </div>
+
+                        <div style="margin-bottom: 10px;">
+                            <button id="admin-kill-player-btn" style="background: #e74c3c; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; width: 100%;">Spieler töten</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Rechte Seite - Admin Funktionen und Karte -->
+                <div style="flex: 1; padding-left: 10px;">
+                    <h3>Admin Kontrollen</h3>
+                    <div style="margin-bottom: 10px;">
+                        <button id="admin-god-mode-btn" style="background: #f39c12; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; width: 100%;">God-Mode: AUS</button>
+                    </div>
+
+                    <div style="margin-bottom: 10px;">
+                        <button id="admin-spawn-bot-btn" style="background: #3498db; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; width: 100%;">Bot spawnen</button>
+                    </div>
+
+                    <div style="margin-top: 20px;">
+                        <h3>Spielerkarte</h3>
+                        <canvas id="admin-map-canvas" width="250" height="150" style="background: #f5f5f5; border: 1px solid #333;"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 15px;">
+                <button id="admin-close-btn" style="background: #e74c3c; color: white; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer;">Schließen</button>
+            </div>
+        </div>
+
+        <script src="/socket.io/socket.io.js"></script>
+        <script>
+            console.log("Spiel wird initialisiert...");
+
+            // Namen aus URL lesen
+            const urlParams = new URLSearchParams(window.location.search);
+            const playerName = urlParams.get("name") || "Unbenannt";
+            console.log("Spielername aus URL:", playerName);
+
+            // Token und Upgrade aus URL holen, falls vorhanden
+            let playerToken = null;
+            let playerUpgrade = null;
+
+            if (urlParams.has('token')) {
+                playerToken = urlParams.get('token');
+                console.log("Token aus URL gelesen:", playerToken);
+            }
+            if (urlParams.has('upgrade')) {
+                playerUpgrade = urlParams.get('upgrade');
+            }
+
+            // Canvas einrichten
+            const canvas = document.getElementById("game-canvas");
+            const ctx = canvas.getContext("2d");
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            // Partikeleffekte Canvas
+            const particleCanvas = document.getElementById("particle-canvas");
+            const particleCtx = particleCanvas.getContext("2d");
+            particleCanvas.width = window.innerWidth;
+            particleCanvas.height = window.innerHeight;
+
+            // Partikelsystem für Kollisionseffekte
+            const particles = [];
+
+            function createExplosion(x, y, color = "#f39c12", count = 12) {
+                const screenX = x - camera.x;
+                const screenY = y - camera.y;
+
+                for (let i = 0; i < count; i++) {
+                    const angle = Math.random() * Math.PI * 2;
+                    const speed = 1 + Math.random() * 3;
+                    const size = 3 + Math.random() * 5;
+                    const lifetime = 30 + Math.random() * 30;
+
+                    particles.push({
+                        x: screenX,
+                        y: screenY,
+                        vx: Math.cos(angle) * speed,
+                        vy: Math.sin(angle) * speed,
+                        size: size,
+                        color: color,
+                        lifetime: lifetime,
+                        age: 0
+                    });
+                }
+            }
+
+            function updateParticles() {
+                particleCtx.clearRect(0, 0, particleCanvas.width, particleCanvas.height);
+
+                for (let i = particles.length - 1; i >= 0; i--) {
+                    const p = particles[i];
+                    p.age++;
+
+                    if (p.age >= p.lifetime) {
+                        particles.splice(i, 1);
+                        continue;
+                    }
+
+                    p.x += p.vx;
+                    p.y += p.vy;
+
+                    const alpha = 1 - (p.age / p.lifetime);
+                    particleCtx.globalAlpha = alpha;
+                    particleCtx.fillStyle = p.color;
+                    particleCtx.beginPath();
+                    particleCtx.arc(p.x, p.y, p.size * (1 - p.age/p.lifetime), 0, Math.PI * 2);
+                    particleCtx.fill();
+                }
+
+                particleCtx.globalAlpha = 1;
+            }
+
+            // Spielkonstanten
+            const PLAYER_BASE_SIZE = 25;
+            const BULLET_BASE_SIZE = 15;
+            const GAME_WIDTH = 4000; // Für Map-Grenzen-Berechnung
+            const GAME_HEIGHT = 4000;
+
+            // Game-Variablen
+            let socket;
+            let player = null;
+            let players = {};
+            let bullets = [];
+            let blocks = [];
+            let camera = { x: 0, y: 0 };
+
+            // NEU: Death Screen Variablen
+            let gameStartTime = Date.now();
+            let killerViewActive = false;
+            let killerViewData = null;
+
+            // Upgrade-Menü-Elemente
+            const upgradeMenu = document.getElementById("upgrade-menu");
+            const upgradeStatus = document.getElementById("upgrade-status");
+
+            // Upgrade-Buttons einrichten
+            const upgradeSkills = [
+                "healthRegen", "maxHealth", "bodyDamage", "bulletSpeed", 
+                "bulletPenetration", "bulletDamage", "reload", "movementSpeed"
+            ];
+
+            upgradeSkills.forEach(skill => {
+                const button = document.getElementById(`${skill}-btn`);
+                if (button) {
+                    button.addEventListener("click", () => {
+                        if (player && player.availableUpgrades > 0 && 
+                            player.upgrades[skill].level < player.upgrades[skill].max &&
+                            player.totalUpgrades < player.maxTotalUpgrades) {
+                            socket.emit("upgrade", skill);
+                        }
+                    });
+                }
+            });
+
+            // Benachrichtigung erstellen
+            function createNotification(message, duration = 3000) {
+                const notification = document.createElement('div');
+                notification.className = 'notification';
+                notification.textContent = message;
+                notification.style.position = 'absolute';
+                notification.style.top = '50px';
+                notification.style.left = '50%';
+                notification.style.transform = 'translateX(-50%)';
+                notification.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+                notification.style.color = 'white';
+                notification.style.padding = '8px 16px';
+                notification.style.borderRadius = '4px';
+                notification.style.zIndex = '1000';
+                notification.style.transition = 'opacity 0.5s';
+
+                document.body.appendChild(notification);
+
+                setTimeout(() => {
+                    notification.style.opacity = '0';
+                    setTimeout(() => {
+                        notification.remove();
+                    }, 500);
+                }, duration);
+            }
+
+            // XP-Bar aktualisieren (Diep.io Style)
+            function updateXPBar() {
+                if (!player) return;
+
+                const xpBar = document.getElementById("xp-bar");
+                const xpText = document.getElementById("xp-text");
+
+                const percentage = (player.xp / player.xpToNextLevel) * 100;
+                xpBar.style.width = `${percentage}%`;
+
+                xpText.textContent = `Level ${player.level} - ${Math.floor(player.xp)}/${player.xpToNextLevel} XP`;
+            }
+
+            // Leaderboard aktualisieren
+            function updateLeaderboard(data) {
+                const leaderboardItems = document.getElementById("leaderboard-items");
+                leaderboardItems.innerHTML = "";
+
+                data.forEach((item, index) => {
+                    const div = document.createElement("div");
+                    div.className = "leaderboard-item";
+
+                    const isCurrentPlayer = item.id === socket.id;
+
+                    div.innerHTML = `
+                        <span>${index + 1}. ${item.isLeader ? '<span class="crown">👑</span>' : ''}
+                            <span class="leaderboard-name" style="${isCurrentPlayer ? 'color: #3498db;' : ''}">${item.name}</span>
+                        </span>
+                        <span>Lvl ${item.level}</span>
+                    `;
+
+                    leaderboardItems.appendChild(div);
+                });
+
+                // Wenn weniger als 5 Spieler, leere Plätze anzeigen
+                for (let i = data.length; i < 5; i++) {
+                    const div = document.createElement("div");
+                    div.className = "leaderboard-item";
+                    div.innerHTML = `<span>${i + 1}. ---</span><span>---</span>`;
+                    leaderboardItems.appendChild(div);
+                }
+            }
+
+            // VERBESSERTE Upgrade-UI aktualisieren
+            function updateUpgradeUI() {
+                if (!player) return;
+
+                // Upgrade-Menü anzeigen, wenn Spieler Level-Punkte hat
+                upgradeMenu.style.display = (player.availableUpgrades > 0) ? "block" : "none";
+
+                // Status aktualisieren
+                upgradeStatus.textContent = `Level-Punkte: ${player.availableUpgrades} | Upgrades: ${player.totalUpgrades}/${player.maxTotalUpgrades}`;
+
+                // Für jedes Upgrade den Level und Button-Status aktualisieren
+                upgradeSkills.forEach(skill => {
+                    const levelIndicator = document.getElementById(`${skill}-level`);
+                    const levelNumber = document.getElementById(`${skill}-number`);
+                    const button = document.getElementById(`${skill}-btn`);
+
+                    if (levelIndicator && button && levelNumber) {
+                        const upgrade = player.upgrades[skill];
+
+                        // Level-Anzeige aktualisieren
+                        const percentage = (upgrade.level / upgrade.max) * 100;
+                        levelIndicator.style.width = `${percentage}%`;
+
+                        // Level-Nummer aktualisieren
+                        levelNumber.textContent = upgrade.level;
+
+                        // Farbe der Level-Nummer basierend auf Level anpassen
+                        if (upgrade.level <= 3) {
+                            levelNumber.style.backgroundColor = "#3498db"; // Blau
+                        } else if (upgrade.level <= 6) {
+                            levelNumber.style.backgroundColor = "#2ecc71"; // Grün
+                        } else if (upgrade.level <= 9) {
+                            levelNumber.style.backgroundColor = "#f39c12"; // Orange
+                        } else {
+                            levelNumber.style.backgroundColor = "#e74c3c"; // Rot
+                        }
+
+                        // Button-Status
+                        const canUpgrade = 
+                            player.availableUpgrades > 0 && 
+                            upgrade.level < upgrade.max && 
+                            player.totalUpgrades < player.maxTotalUpgrades;
+
+                        button.classList.toggle("disabled", !canUpgrade);
+
+                        // Anzeige als Tooltip
+                        button.title = canUpgrade ? 
+                            `Auf Level ${upgrade.level + 1} verbessern (${upgrade.level}/${upgrade.max})` : 
+                            `Maximum: ${upgrade.max} (aktuell: ${upgrade.level})`;
+                    }
+                });
+            }
+
+            // Debug-Modus mit Strg+Alt+D umschalten
+            let debugMode = false;
+            window.addEventListener('keydown', (e) => {
+                if (e.ctrlKey && e.altKey && e.key === 'd') {
+                    debugMode = !debugMode;
+                    document.getElementById('debug-info').style.display = debugMode ? 'block' : 'none';
+                }
+            });
+
+            // Debug-Funktion
+            function debugLog(message) {
+                if (debugMode) {
+                    console.log(message);
+                    const debugInfo = document.getElementById('debug-info');
+                    debugInfo.innerHTML += message + '<br>';
+                    if (debugInfo.innerHTML.length > 1000) {
+                        debugInfo.innerHTML = debugInfo.innerHTML.substring(debugInfo.innerHTML.length - 1000);
+                    }
+                }
+            }
+
+            // Canvas Größenänderung behandeln
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+                particleCanvas.width = window.innerWidth;
+                particleCanvas.height = window.innerHeight;
+            });
+
+            // NEU: Death Screen Funktionen
+            function initTimeTracking() {
+                gameStartTime = Date.now();
+            }
+
+            function formatGameTime(milliseconds) {
+                const totalSeconds = Math.floor(milliseconds / 1000);
+                const minutes = Math.floor(totalSeconds / 60);
+                const seconds = totalSeconds % 60;
+                return minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
+            }
+
+            // Missionen für den DeathScreen laden
+            function loadMissionsForDeathScreen() {
+                if (!playerToken) return;
+
+                console.log("Lade Missionen für DeathScreen mit Token:", playerToken);
+
+                fetch(`https://nm-web.de/get_daily_missions.php?token=${encodeURIComponent(playerToken)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log("Erhaltene Missionsdaten:", data);
+                        if (data.success && data.missions && data.missions.length > 0) {
+                            // Missionsbereich einblenden
+                            document.getElementById('death-missions').style.display = 'block';
+
+                            // Missionen anzeigen
+                            displayMissionsInDeathScreen(data.missions);
+                        } else {
+                            console.log("Keine Missionen erhalten oder Fehler in der Antwort");
+                            document.getElementById('death-missions').style.display = 'none';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Fehler beim Laden der Missionen für den DeathScreen:', error);
+                        document.getElementById('death-missions').style.display = 'none';
+                    });
+            }
+
+            // Missionen im DeathScreen anzeigen
+            function displayMissionsInDeathScreen(missions) {
+                const missionsList = document.getElementById('death-missions-list');
+                missionsList.innerHTML = '';
+
+                console.log("Zeige diese Missionen an:", missions);
+
+                missions.forEach(mission => {
+                    const progress = mission.progress || 0;
+                    const target = mission.target || 1;
+                    const percentage = Math.min(100, Math.round((progress / target) * 100));
+                    const isComplete = percentage >= 100;
+
+                    const missionElement = document.createElement('div');
+                    missionElement.className = `death-mission-item ${isComplete ? 'death-mission-complete' : ''}`;
+                    missionElement.innerHTML = `
+                        <div style="display: flex; justify-content: space-between;">
+                            <div>${mission.description}</div>
+                            <div class="death-mission-reward">+${mission.reward}</div>
+                        </div>
+                        <div class="death-mission-progress">
+                            <div class="death-mission-bar">
+                                <div class="death-mission-fill" style="width: ${percentage}%;"></div>
+                            </div>
+                            <div class="death-mission-status">
+                                ${progress}/${target} ${isComplete && !mission.claimed ? '✓' : ''}
+                            </div>
+                        </div>
+                    `;
+
+                    missionsList.appendChild(missionElement);
+                });
+            }
+
+            function showDeathScreen(data) {
+                console.log("Death Screen mit Daten anzeigen:", data);
+
+                const deathScreen = document.getElementById('death-screen');
+                const deathKiller = document.getElementById('death-killer');
+                const deathScore = document.getElementById('death-score');
+                const deathLevel = document.getElementById('death-level');
+                const deathTime = document.getElementById('death-time');
+                const deathCoinsDisplay = document.getElementById('death-coins-display');
+                const deathCoins = document.getElementById('death-coins');
+                const deathContinueBtn = document.getElementById('death-continue-btn');
+
+                // Set death screen data
+                deathKiller.textContent = data.killerName || "Unknown";
+                deathScore.textContent = data.score || 0;
+                deathLevel.textContent = data.level || 1;
+
+                // Coins anzeigen, falls verfügbar
+                if (data.coins_earned) {
+                    deathCoins.textContent = data.coins_earned;
+                    deathCoinsDisplay.style.display = 'flex';
+                    console.log("Zeige verdiente Coins an:", data.coins_earned);
+                } else {
+                    deathCoinsDisplay.style.display = 'none';
+                }
+
+                // Calculate game time
+                const gameTime = Date.now() - gameStartTime;
+                deathTime.textContent = formatGameTime(gameTime);
+
+                // Show achievement if applicable
+                const achievementDiv = document.getElementById('death-achievement');
+                const achievementText = document.getElementById('death-achievement-text');
+
+                if (data.achievement) {
+                    achievementDiv.style.display = 'block';
+                    achievementText.textContent = data.achievement;
+                } else {
+                    achievementDiv.style.display = 'none';
+                }
+
+                // Update UI for death screen
+                deathScreen.style.display = 'block';
+
+                // Hide gameplay UI elements
+                document.getElementById('minimap-container').style.display = 'none';
+                document.getElementById('leaderboard').style.display = 'none';
+                document.getElementById('xp-bar-container').style.display = 'none';
+                document.getElementById('upgrade-menu').style.display = 'none';
+
+                // Missionen laden, falls angemeldet
+                if (playerToken) {
+                    console.log("Lade Missionen für angemeldeten Spieler mit Token:", playerToken);
+                    loadMissionsForDeathScreen();
+                } else {
+                    console.log("Kein playerToken, zeige keine Missionen an");
+                    document.getElementById('death-missions').style.display = 'none';
+                }
+
+                // Set up continue button
+                deathContinueBtn.addEventListener('click', function() {
+                    location.reload();
+                });
+
+                // If killer exists, show their view
+                if (data.killerId && players[data.killerId]) {
+                    killerViewActive = true;
+                    killerViewData = players[data.killerId];
+                }
+            }
+
+            function updateKillerView() {
+                if (!killerViewActive || !killerViewData) return;
+
+                // Update camera to follow killer
+                camera.x = killerViewData.x - canvas.width / 2;
+                camera.y = killerViewData.y - canvas.height / 2;
+            }
+
+            // Missionsverfolgung implementieren
+            function trackMissionProgress(type, amount) {
+                if (!playerToken) return; // Nur für angemeldete Spieler
+
+                console.log(`Sende Mission-Fortschritt: ${type}, Menge: ${amount}, Token: ${playerToken}`);
+
+                // Fetch verwenden, um Fortschritt zu senden
+                fetch(`https://nm-web.de/update_mission_progress.php?token=${encodeURIComponent(playerToken)}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        type: type,
+                        amount: amount
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Auf abgeschlossene Missionen reagieren
+                    if (data.completed_missions && data.completed_missions.length > 0) {
+                        data.completed_missions.forEach(mission => {
+                            createNotification(`Mission abgeschlossen: ${mission.description}! +${mission.reward} Coins`, 5000);
+
+                            // Visueller Effekt für abgeschlossene Mission
+                            if (player) {
+                                createExplosion(player.x, player.y, "#f1c40f", 20); // Goldener Explosionseffekt
+                            }
+                        });
+                    }
+                })
+                .catch(error => console.error('Fehler beim Aktualisieren des Missionsfortschritts:', error));
+            }
+
+            // Spiel direkt starten
+            startGame();
+
+            function startGame() {
+                console.log("Starte Spiel mit Namen:", playerName);
+
+                // Socket.io initialisieren
+                socket = io();
+
+                // Event-Handler
+                socket.on("connect", () => {
+                    console.log("Verbunden mit Server, Socket-ID:", socket.id);
+                    // Join-Daten mit Token und Upgrade
+                    socket.emit("join", {
+                        name: playerName,
+                        token: playerToken,
+                        upgrade: playerUpgrade
+                    });
+                });
+
+                socket.on("init", (data) => {
+                    console.log("Spiel initialisiert:", data);
+                    player = data.player;
+                    players = data.players;
+                    blocks = data.blocks;
+                    document.getElementById("loading").style.display = "none";
+
+                    // NEU: Wenn God-Mode schon aktiviert war, sofort an Server senden
+                    if (ADMIN_CONFIG && ADMIN_CONFIG.GOD_MODE === true) {
+                        console.log("God-Mode beim Start aktiviert, sende an Server");
+                        socket.emit('toggle_god_mode', true);
+                    }
+
+                    // UI initialisieren
+                    updateUpgradeUI();
+                    updateXPBar();
+
+                    // NEU: Spielzeit Tracking starten
+                    initTimeTracking();
+                });
+
+                socket.on("gameState", (data) => {
+                    players = data.players;
+                    bullets = data.bullets;
+                    blocks = data.blocks;
+
+                    if (socket.id in players) {
+                        player = players[socket.id];
+                        updateUpgradeUI();
+                        updateXPBar();
+                    }
+                });
+
+                socket.on('leaderboardUpdate', (leaderboardData) => {
+                    updateLeaderboard(leaderboardData);
+                });
+
+                socket.on('levelUp', (data) => {
+                    createNotification(`Level Up! Sie sind jetzt Level ${data.level}!`);
+                    // Animation für Level-Up hinzufügen
+                    createExplosion(player.x, player.y, "#2ecc71", 30);
+
+                    // Sound-Effekt könnte hier eingefügt werden
+                    if (player) {
+                        player.level = data.level;
+                        player.xpToNextLevel = data.xpToNextLevel;
+                        player.availableUpgrades = data.availableUpgrades;
+
+                        // Sofort UI aktualisieren
+                        updateXPBar();
+                        updateUpgradeUI();
+                    }
+
+                    // Mission tracken
+                    if (playerToken) {
+                        trackMissionProgress('reach_level', data.level);
+                    }
+                });
+
+                socket.on('xpGained', (data) => {
+                    if (data.fromKill) {
+                        createNotification(`+${data.amount} XP von der Beseitigung von ${data.victimName}!`);
+                    }
+                    updateXPBar();
+
+                    // Mission tracken
+                    if (playerToken) {
+                        trackMissionProgress('collect_xp', data.amount);
+                    }
+                });
+
+                socket.on('playerDamaged', (data) => {
+                    if (data.id in players) {
+                        players[data.id].health = data.health;
+                        debugLog(`Spieler ${players[data.id].name} hat Schaden erhalten: ${data.health}`);
+                    }
+                });
+
+                socket.on('blockDamaged', (data) => {
+                    const block = blocks.find(b => b.id === data.id);
+                    if (block) {
+                        block.health = data.health;
+                        debugLog(`Block ${data.id} hat Schaden erhalten: ${data.health}`);
+                    }
+
+                    // Block zerstört, tracke Mission
+                    if (block && data.health <= 0 && playerToken) {
+                        trackMissionProgress('destroy_blocks', 1);
+                    }
+                });
+
+                socket.on('bulletCollision', (data) => {
+                    // Kollisionseffekt hinzufügen
+                    createExplosion(data.x, data.y, "#f39c12", 15);
+                    debugLog(`Kugelkollision bei ${data.x}, ${data.y}`);
+                });
+
+                socket.on('upgradeApplied', (data) => {
+                    if (player) {
+                        player.upgrades[data.skill].level = data.level;
+                        player.totalUpgrades = data.totalUpgrades;
+                        player.availableUpgrades = data.availableUpgrades;
+
+                        updateUpgradeUI();
+                        debugLog(`Upgrade ${data.skill} auf Level ${data.level} erhöht`);
+                    }
+                });
+
+                // God-Mode-Ende behandeln
+                socket.on('godModeEnded', () => {
+                    // Visuelle Rückmeldung für den Spieler
+                    createNotification('Unsterblichkeit ist abgelaufen!');
+                });
+
+                // NEU: Verbesserter 'died' Event-Handler
+                socket.on('died', (data) => {
+                    debugLog('Du bist gestorben!');
+                    console.log('Tod-Event erhalten mit Daten:', data);
+
+                    // Wenn angemeldet, sende Statistiken an den Server und hole Coins-Info
+                    if (playerToken) {
+                        const gameTime = (Date.now() - gameStartTime) / 1000; // in Sekunden
+                        console.log("Sende Spielstatistiken mit Token:", playerToken);
+
+                        fetch(`https://nm-web.de/game_end.php`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                token: playerToken,
+                                playtime: gameTime,
+                                kills: player ? (player.kills || 0) : 0,
+                                max_level: player ? (player.level || 1) : 1,
+                                score: data.score || 0
+                            })
+                        })
+                        .then(response => response.json())
+                        .then(gameEndData => {
+                            console.log("Game-End Daten erhalten:", gameEndData);
+
+                            // Coins zum Death-Screen-Data hinzufügen
+                            data.coins_earned = gameEndData.coins_earned || 0;
+
+                            // Death Screen mit den aktualisierten Daten anzeigen
+                            showDeathScreen(data);
+                        })
+                        .catch(error => {
+                            console.error('Fehler beim Senden der Spielstatistiken:', error);
+
+                            // Trotzdem Death Screen anzeigen, aber ohne Coins-Info
+                            showDeathScreen(data);
+                        });
+                    } else {
+                        // Direkt Death Screen anzeigen, wenn nicht angemeldet
+                        showDeathScreen(data);
+                    }
+                });
+
+                // Tracking für Kills hinzufügen
+                socket.on('playerLeft', (playerId) => {
+                    // Wenn ein Spieler das Spiel verlässt
+                    if (document.getElementById('admin-panel').style.display === 'block') {
+                        // Wenn der selektierte Spieler das Spiel verlassen hat, Auswahl zurücksetzen
+                        if (ADMIN_CONFIG.SELECTED_PLAYER_ID === playerId) {
+                            ADMIN_CONFIG.SELECTED_PLAYER_ID = null;
+                        }
+                        updateAdminPlayersUI();
+                    }
+
+                    // Einfache Heuristik: Wenn ein Spieler verschwindet und unsere Kugeln in der Nähe waren, zählt es als Kill
+                    if (playerToken && bullets.some(b => b.ownerId === socket.id)) {
+                        // Schauen, ob einer der Spieler, die das Spiel verlassen haben, in der Nähe unserer Kugeln war
+                        const exitedPlayer = players[playerId];
+                        if (exitedPlayer && bullets.some(b => 
+                            b.ownerId === socket.id && 
+                            Math.hypot(b.x - exitedPlayer.x, b.y - exitedPlayer.y) < 100)) {
+                            // Es ist wahrscheinlich, dass wir diesen Spieler getötet haben
+                            trackMissionProgress('kill_enemies', 1);
+                        }
+                    }
+                });
+
+                // Spielsteuerung einrichten
+                setupControls();
+
+                // Spielschleife starten
+                requestAnimationFrame(gameLoop);
+
+                // Regelmäßiges Update für die Spielzeit
+                setInterval(() => {
+                    if (playerToken && player) {
+                        trackMissionProgress('play_minutes', 1);
+                        trackMissionProgress('survive_minutes', 1);
+                    }
+                }, 60000); // Jede Minute
+            }
+
+            // Steuerung einrichten
+            function setupControls() {
+                const keys = { w: false, a: false, s: false, d: false };
+                let isMouseDown = false;
+                let shootingInterval = null;
+                const shootingSpeed = 33; // Ca. 30 Schüsse pro Sekunde, passend zum Game-Loop
+
+                window.addEventListener("keydown", (e) => {
+                    if (e.key.toLowerCase() in keys) {
+                        keys[e.key.toLowerCase()] = true;
+                    }
+                });
+
+                window.addEventListener("keyup", (e) => {
+                    if (e.key.toLowerCase() in keys) {
+                        keys[e.key.toLowerCase()] = false;
+                    }
+                });
+
+                window.addEventListener("mousemove", (e) => {
+                    if (player && socket) {
+                        const dx = e.clientX - canvas.width / 2;
+                        const dy = e.clientY - canvas.height / 2;
+                        const angle = Math.atan2(dy, dx);
+                        socket.emit("rotate", angle);
+                    }
+                });
+
+                // Kontinuierliches Schießen mit gedrückter Maustaste
+                window.addEventListener("mousedown", (e) => {
+                    if (e.button === 0 && socket) {
+                        // Linke Maustaste
+                        isMouseDown = true;
+
+                        // Ersten Schuss sofort abfeuern
+                        socket.emit("shoot");
+
+                        // Kontinuierliches Schießen starten
+                        shootingInterval = setInterval(() => {
+                            if (isMouseDown && player && socket) {
+                                socket.emit("shoot");
+                            }
+                        }, shootingSpeed);
+                    }
+                });
+
+                // Schießen stoppen, wenn Maustaste losgelassen wird
+                window.addEventListener("mouseup", (e) => {
+                    if (e.button === 0) {
+                        isMouseDown = false;
+
+                        // Schießen stoppen
+                        if (shootingInterval) {
+                            clearInterval(shootingInterval);
+                            shootingInterval = null;
+                        }
+                    }
+                });
+
+                // Auch das Interval leeren wenn die Maus das Fenster verlässt
+                window.addEventListener("mouseout", (e) => {
+                    if (e.relatedTarget == null) { // Maus hat das Fenster verlassen
+                        isMouseDown = false;
+
+                        if (shootingInterval) {
+                            clearInterval(shootingInterval);
+                            shootingInterval = null;
+                        }
+                    }
+                });
+
+                // Bewegung
+                setInterval(() => {
+                    if (player && socket) {
+                        let dx = 0,
+                            dy = 0;
+
+                        if (keys.w) dy -= 1;
+                        if (keys.s) dy += 1;
+                        if (keys.a) dx -= 1;
+                        if (keys.d) dx += 1;
+
+                        // Diagonale Bewegung normalisieren
+                        if (dx !== 0 && dy !== 0) {
+                            dx *= 0.7071;
+                            dy *= 0.7071;
+                        }
+
+                        // Nur senden, wenn Bewegung vorhanden ist
+                        if (dx !== 0 || dy !== 0) {
+                            socket.emit("move", { dx, dy });
+                        }
+                    }
+                }, 33);
+            }
+
+            // VERBESSERT: Spielschleife mit Unterstützung für Killer-View
+            function gameLoop() {
+                if (player || killerViewActive) {
+                    // Spielzustand aktualisieren
+                    if (player) {
+                        update();
+                    } else if (killerViewActive) {
+                        updateKillerView();
+                    }
+
+                    // Alles zeichnen
+                    drawGame();
+
+                    // Partikel aktualisieren
+                    updateParticles();
+                }
+
+                requestAnimationFrame(gameLoop);
+            }
+
+            // Spielzustand aktualisieren
+            function update() {
+                // Kamera auf Spieler zentrieren
+                camera.x = player.x - canvas.width / 2;
+                camera.y = player.y - canvas.height / 2;
+
+                // Kollisionen prüfen
+                checkPlayerCollisions();
+            }
+
+            // Kollisionen des Spielers prüfen
+            function checkPlayerCollisions() {
+                if (!player) return;
+
+                // KORREKTUR: Explizit mit === true vergleichen
+                if (ADMIN_CONFIG && ADMIN_CONFIG.GOD_MODE === true) {
+                    // Bei aktiviertem God-Mode keine Kollisionsprüfung durchführen
+                    return;
+                }
+
+                // Kollision mit Blöcken prüfen
+                for (const block of blocks) {
+                    const dx = player.x - block.x;
+                    const dy = player.y - block.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    const minDistance = 30 + (block.size || 30) / 2; // Spielergröße + Blockgröße/2
+
+                    if (distance < minDistance) {
+                        // Kollision! Schaden verursachen
+                        const damage = player.upgrades.bodyDamage.level; // Schaden basierend auf Körperschaden
+                        socket.emit("takeDamage", {
+                            damage,
+                            type: "block",
+                            id: block.id,
+                        });
+                        debugLog(`Kollision mit Block ${block.id}, Schaden: ${damage}`);
+
+                        // Wegdrücken (einfache Physik)
+                        const angle = Math.atan2(dy, dx);
+                        const pushX = Math.cos(angle) * (minDistance - distance);
+                        const pushY = Math.sin(angle) * (minDistance - distance);
+                        socket.emit("move", {
+                            dx: pushX * 0.1,
+                            dy: pushY * 0.1,
+                        });
+                    }
+                }
+
+                // Kollision mit anderen Spielern prüfen
+                for (const id in players) {
+                    if (id === socket.id) continue; // Nicht mit sich selbst kollidieren
+
+                    const otherPlayer = players[id];
+                    const dx = player.x - otherPlayer.x;
+                    const dy = player.y - otherPlayer.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    const minDistance = 30 + 30; // Beide Spieler haben Radius 30
+
+                    if (distance < minDistance) {
+                        // Kollision! Schaden verursachen
+                        const damage = player.upgrades.bodyDamage.level * 2; // Spieler-gegen-Spieler-Schaden
+                        socket.emit("takeDamage", {
+                            damage,
+                            type: "player",
+                            id: id,
+                        });
+                        debugLog(`Kollision mit Spieler ${otherPlayer.name}, Schaden: ${damage}`);
+
+                        // Wegdrücken
+                        const angle = Math.atan2(dy, dx);
+                        const pushX = Math.cos(angle) * (minDistance - distance);
+                        const pushY = Math.sin(angle) * (minDistance - distance);
+                        socket.emit("move", {
+                            dx: pushX * 0.1,
+                            dy: pushY * 0.1,
+                        });
+                    }
+                }
+            }
+
+            // VERBESSERTE Spiel zeichnen Funktion
+            function drawGame() {
+                // Hintergrund
+                ctx.fillStyle = "#f0f0f0";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                // Dunklere Bereiche außerhalb der Map zeichnen
+                const mapBorderWidth = 100; // Breite des dunkleren Bereichs am Rand
+                const borderColor = "rgba(0, 0, 0, 0.3)"; // Halbtransparentes Schwarz
+
+                // Spielfeldgrenzen berechnen (basierend auf Kameraposition)
+                const leftEdge = 0 - camera.x;
+                const rightEdge = GAME_WIDTH - camera.x;
+                const topEdge = 0 - camera.y;
+                const bottomEdge = GAME_HEIGHT - camera.y;
+
+                // Bereiche außerhalb zeichnen (links, rechts, oben, unten)
+                ctx.fillStyle = borderColor;
+
+                // Links
+                if (leftEdge > 0) {
+                    ctx.fillRect(0, 0, leftEdge, canvas.height);
+                }
+
+                // Rechts
+                if (rightEdge < canvas.width) {
+                    ctx.fillRect(rightEdge, 0, canvas.width - rightEdge, canvas.height);
+                }
+
+                // Oben
+                if (topEdge > 0) {
+                    ctx.fillRect(0, 0, canvas.width, topEdge);
+                }
+
+                // Unten
+                if (bottomEdge < canvas.height) {
+                    ctx.fillRect(0, bottomEdge, canvas.width, canvas.height - bottomEdge);
+                }
+
+                // SPIELFELDRAND VISUELL MARKIEREN
+                if (leftEdge < mapBorderWidth && leftEdge > 0) {
+                    ctx.fillStyle = "rgba(0, 0, 0, 0.15)";
+                    ctx.fillRect(leftEdge - mapBorderWidth, 0, mapBorderWidth, canvas.height);
+                }
+
+                if (rightEdge > canvas.width - mapBorderWidth && rightEdge < canvas.width) {
+                    ctx.fillStyle = "rgba(0, 0, 0, 0.15)";
+                    ctx.fillRect(rightEdge, 0, mapBorderWidth, canvas.height);
+                }
+
+                if (topEdge < mapBorderWidth && topEdge > 0) {
+                    ctx.fillStyle = "rgba(0, 0, 0, 0.15)";
+                    ctx.fillRect(0, topEdge - mapBorderWidth, canvas.width, mapBorderWidth);
+                }
+
+                if (bottomEdge > canvas.height - mapBorderWidth && bottomEdge < canvas.height) {
+                    ctx.fillStyle = "rgba(0, 0, 0, 0.15)";
+                    ctx.fillRect(0, bottomEdge, canvas.width, mapBorderWidth);
+                }
+
+                // Raster zeichnen (nur innerhalb des Spielfelds)
+                drawGrid();
+
+                // Blöcke zeichnen
+                blocks.forEach((block) => {
+                    drawBlock(block);
+                });
+
+                // Geschosse zeichnen
+                bullets.forEach((bullet) => {
+                    drawBullet(bullet);
+                });
+
+                // Andere Spieler zeichnen
+                for (const id in players) {
+                    if (id !== socket.id || !player) {
+                        drawPlayer(players[id], id === socket.id);
+                    }
+                }
+
+                // Eigenen Spieler zeichnen (nur wenn aktiv, nicht im Death Screen)
+                if (player) {
+                    drawPlayer(player, true);
+                }
+
+                // UI zeichnen
+                if (player) {
+                    drawUI();
+                }
+
+                // Minimap zeichnen
+                if (!killerViewActive) {
+                    drawMinimap();
+                }
+            }
+
+            // VERBESSERTES Raster zeichnen
+            function drawGrid() {
+                const gridSize = 30;
+                const offsetX = -camera.x % gridSize;
+                const offsetY = -camera.y % gridSize;
+
+                // Spielfeldgrenzen
+                const leftEdge = Math.max(0, 0 - camera.x);
+                const rightEdge = Math.min(canvas.width, GAME_WIDTH - camera.x);
+                const topEdge = Math.max(0, 0 - camera.y);
+                const bottomEdge = Math.min(canvas.height, GAME_HEIGHT - camera.y);
+
+                ctx.strokeStyle = "#ddd";
+                ctx.lineWidth = 1;
+
+                // Vertikale Linien (nur innerhalb der Spielfeldgrenzen)
+                for (let x = offsetX + leftEdge; x < rightEdge; x += gridSize) {
+                    ctx.beginPath();
+                    ctx.moveTo(x, topEdge);
+                    ctx.lineTo(x, bottomEdge);
+                    ctx.stroke();
+                }
+
+                // Horizontale Linien (nur innerhalb der Spielfeldgrenzen)
+                for (let y = offsetY + topEdge; y < bottomEdge; y += gridSize) {
+                    ctx.beginPath();
+                    ctx.moveTo(leftEdge, y);
+                    ctx.lineTo(rightEdge, y);
+                    ctx.stroke();
+                }
+            }
+
+            // Hilfsfunktionen zum Zeichnen
+            function drawPlayer(player, isMainPlayer) {
+                const screenX = player.x - camera.x;
+                const screenY = player.y - camera.y;
+                const size = PLAYER_BASE_SIZE; // Kleinere Spielerkreise (25px)
+
+                // Spieler-Körper
+                ctx.fillStyle = isMainPlayer ? "#3498db" : "#e74c3c";
+                ctx.beginPath();
+                ctx.arc(screenX, screenY, size, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Kanone
+                ctx.save();
+                ctx.translate(screenX, screenY);
+                ctx.rotate(player.angle || 0);
+                ctx.fillStyle = isMainPlayer ? "#2980b9" : "#c0392b";
+                ctx.fillRect(0, -size / 4, size * 1.5, size / 2);
+                ctx.restore();
+
+                // Krone für den Führenden
+                if (player.isLeader) {
+                    ctx.save();
+                    ctx.translate(screenX, screenY - size - 10);
+
+                    // Krone zeichnen
+                    ctx.fillStyle = "#f1c40f"; // Gold
+                    ctx.beginPath();
+                    ctx.moveTo(-10, 0);
+                    ctx.lineTo(-5, -8);
+                    ctx.lineTo(0, -3);
+                    ctx.lineTo(5, -8);
+                    ctx.lineTo(10, 0);
+                    ctx.closePath();
+                    ctx.fill();
+
+                    ctx.restore();
+                }
+
+                // Gesundheitsleiste
+                const healthBarWidth = size * 2;
+                const healthBarHeight = 6;
+                const maxHealth = player.maxHealth || 100;
+                const healthPercent = player.health / maxHealth;
+
+                // Hintergrund der Gesundheitsleiste
+                ctx.fillStyle = "#333";
+                ctx.fillRect(
+                    screenX - healthBarWidth / 2,
+                    screenY + size + 10,
+                    healthBarWidth,
+                    healthBarHeight,
+                );
+
+                // Farbige Gesundheitsleiste
+                if (healthPercent > 0.6) {
+                    ctx.fillStyle = "#2ecc71"; // Grün
+                } else if (healthPercent > 0.3) {
+                    ctx.fillStyle = "#f39c12"; // Orange
+                } else {
+                    ctx.fillStyle = "#e74c3c"; // Rot
+                }
+                ctx.fillRect(
+                    screenX - healthBarWidth / 2,
+                    screenY + size + 10,
+                    healthBarWidth * healthPercent,
+                    healthBarHeight,
+                );
+
+                // Name
+                ctx.fillStyle = "#333";
+                ctx.font = "14px Arial";
+                ctx.textAlign = "center";
+                ctx.fillText(player.name, screenX, screenY + size + 25);
+
+                // Level
+                if (player.level) {
+                    ctx.fillText("Lvl " + player.level, screenX, screenY + size + 40);
+                }
+            }
+
+            function drawBullet(bullet) {
+                const screenX = bullet.x - camera.x;
+                const screenY = bullet.y - camera.y;
+                const size = bullet.size || 10; // Größe aus Bullet-Objekt oder Standardwert
+
+                ctx.fillStyle =
+                    bullet.ownerId === socket.id ? "#3498db" : "#e74c3c";
+                ctx.beginPath();
+                ctx.arc(screenX, screenY, size/2, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Optional: Gesundheitsanzeige für Kugeln im Debug-Modus
+                if (debugMode && bullet.health !== undefined) {
+                    const healthPercent = bullet.health / bullet.penetration;
+                    ctx.fillStyle = healthPercent > 0.5 ? "#2ecc71" : "#e74c3c";
+                    ctx.fillRect(
+                        screenX - size/2,
+                        screenY + size/2 + 2,
+                        size * healthPercent,
+                        2
+                    );
+                }
+            }
+
+            function drawBlock(block) {
+                const screenX = block.x - camera.x;
+                const screenY = block.y - camera.y;
+                const size = block.size || 30;
+
+                ctx.save();
+                ctx.translate(screenX, screenY);
+                ctx.rotate(block.rotation || 0);
+
+                // Block entsprechend seiner Form zeichnen
+                ctx.fillStyle = block.color || "#f1c40f";
+
+                if (block.shape === 'triangle') {
+                    // Dreieck zeichnen
+                    ctx.beginPath();
+                    ctx.moveTo(0, -size/2);
+                    ctx.lineTo(-size/2, size/2);
+                    ctx.lineTo(size/2, size/2);
+                    ctx.closePath();
+                    ctx.fill();
+                } else if (block.shape === 'pentagon') {
+                    // Pentagon zeichnen
+                    ctx.beginPath();
+                    for (let i = 0; i < 5; i++) {
+                        const angle = (i * 2 * Math.PI / 5) - Math.PI/2;
+                        const x = Math.cos(angle) * size/2;
+                        const y = Math.sin(angle) * size/2;
+                        if (i === 0) {
+                            ctx.moveTo(x, y);
+                        } else {
+                            ctx.lineTo(x, y);
+                        }
+                    }
+                    ctx.closePath();
+                    ctx.fill();
+                } else {
+                    // Standard: Quadrat zeichnen
+                    ctx.fillRect(-size/2, -size/2, size, size);
+                }
+
+                ctx.restore();
+
+                // Gesundheitsleiste, falls gesetzt
+                if (
+                    block.health !== undefined &&
+                    block.maxHealth !== undefined
+                ) {
+                    const healthBarWidth = size;
+                    const healthBarHeight = 4;
+                    const healthPercent = block.health / block.maxHealth;
+
+                    // Hintergrund der Gesundheitsleiste
+                    ctx.fillStyle = "#333";
+                    ctx.fillRect(
+                        screenX - healthBarWidth / 2,
+                        screenY + size / 2 + 5,
+                        healthBarWidth,
+                        healthBarHeight,
+                    );
+
+                    // Farbige Gesundheitsleiste
+                    ctx.fillStyle = healthPercent > 0.5 ? "#2ecc71" : "#e74c3c";
+                    ctx.fillRect(
+                        screenX - healthBarWidth / 2,
+                        screenY + size / 2 + 5,
+                        healthBarWidth * healthPercent,
+                        healthBarHeight,
+                    );
+                }
+            }
+
+            function drawUI() {
+                // Punktzahl, etc. anzeigen
+                if (player) {
+                    ctx.fillStyle = "#333";
+                    ctx.font = "bold 16px Arial";
+                    ctx.textAlign = "start";
+                    ctx.fillText(`Score: ${player.score || 0}`, 20, 30);
+
+                    if (player.points) {
+                        ctx.fillText(`Punkte: ${Math.floor(player.points)}`, 20, 55);
+                    }
+                }
+            }
+
+            function drawMinimap() {
+                // Im Death Screen keine Minimap zeichnen
+                if (killerViewActive) return;
+
+                const minimapCanvas = document.getElementById("minimap-canvas");
+                const minimapCtx = minimapCanvas.getContext("2d");
+                const minimapWidth = minimapCanvas.width;
+                const minimapHeight = minimapCanvas.height;
+                const mapWidth = 4000; // Spielkartengröße anpassen
+                const mapHeight = 4000;
+
+                // Minimap löschen
+                minimapCtx.fillStyle = "#f5f5f5";
+                minimapCtx.fillRect(0, 0, minimapWidth, minimapHeight);
+
+                // Raster auf Minimap zeichnen
+                minimapCtx.strokeStyle = "#ddd";
+                minimapCtx.lineWidth = 0.5;
+                const gridSize = 10;
+                for (let x = 0; x < minimapWidth; x += gridSize) {
+                    minimapCtx.beginPath();
+                    minimapCtx.moveTo(x, 0);
+                    minimapCtx.lineTo(x, minimapHeight);
+                    minimapCtx.stroke();
+                }
+                for (let y = 0; y < minimapHeight; y += gridSize) {
+                    minimapCtx.beginPath();
+                    minimapCtx.moveTo(0, y);
+                    minimapCtx.lineTo(minimapWidth, y);
+                    minimapCtx.stroke();
+                }
+
+                // Ränder der Karte
+                minimapCtx.strokeStyle = "#333";
+                minimapCtx.lineWidth = 1;
+                minimapCtx.strokeRect(0, 0, minimapWidth, minimapHeight);
+
+                // Sichtfeld des Spielers
+                if (player) {
+                    const viewX = (player.x / mapWidth) * minimapWidth;
+                    const viewY = (player.y / mapHeight) * minimapHeight;
+                    const viewW = (canvas.width / mapWidth) * minimapWidth;
+                    const viewH = (canvas.height / mapHeight) * minimapHeight;
+
+                    minimapCtx.strokeStyle = "#333";
+                    minimapCtx.strokeRect(
+                        viewX - viewW / 2,
+                        viewY - viewH / 2,
+                        viewW,
+                        viewH,
+                    );
+                }
+
+                // Blöcke zeichnen
+                if (blocks) {
+                    blocks.forEach((block) => {
+                        const blockX = (block.x / mapWidth) * minimapWidth;
+                        const blockY = (block.y / mapHeight) * minimapHeight;
+
+                        // Verschiedene Farben für verschiedene Blocktypen
+                        minimapCtx.fillStyle = block.color || "#f1c40f";
+
+                        if (block.shape === 'triangle') {
+                            minimapCtx.beginPath();
+                            minimapCtx.moveTo(blockX, blockY - 1);
+                            minimapCtx.lineTo(blockX - 1, blockY + 1);
+                            minimapCtx.lineTo(blockX + 1, blockY + 1);
+                            minimapCtx.closePath();
+                            minimapCtx.fill();
+                        } else if (block.shape === 'pentagon') {
+                            minimapCtx.beginPath();
+                            minimapCtx.arc(blockX, blockY, 2, 0, Math.PI * 2);
+                            minimapCtx.fill();
+                        } else {
+                            minimapCtx.fillRect(blockX - 1, blockY - 1, 2, 2);
+                        }
+                    });
+                }
+
+                // Nur eigenen Spieler zeichnen (keine Gegner auf der Minimap)
+                if (player) {
+                    const playerX = (player.x / mapWidth) * minimapWidth;
+                    const playerY = (player.y / mapHeight) * minimapHeight;
+
+                    minimapCtx.fillStyle = "#3498db"; // Blau für eigenen Spieler
+                    minimapCtx.beginPath();
+                    minimapCtx.arc(playerX, playerY, 4, 0, Math.PI * 2);
+                    minimapCtx.fill();
+
+                    // Blickrichtung des Spielers anzeigen
+                    minimapCtx.strokeStyle = "#3498db";
+                    minimapCtx.beginPath();
+                    minimapCtx.moveTo(playerX, playerY);
+                    minimapCtx.lineTo(
+                        playerX + Math.cos(player.angle) * 8,
+                        playerY + Math.sin(player.angle) * 8
+                    );
+                    minimapCtx.stroke();
+                }
+            }
+
+            // Admin-Konfiguration
+            const ADMIN_CONFIG = {
+                PASSWORD: 'NomNom123',
+                GOD_MODE: false,
+                SELECTED_PLAYER_ID: null
+            };
+
+            // Admin-Map-Variablen
+            let adminMapCtx = null;
+            let adminMapInterval = null;
+
+            // Event-Listener für Admin-Menü
+            window.addEventListener('keydown', (e) => {
+                if (e.key === 'u') {
+                    // Admin-Passwort-Dialog anzeigen
+                    document.getElementById('admin-password-dialog').style.display = 'block';
+                    document.getElementById('admin-password').focus();
+                    document.getElementById('admin-password').value = '';
+                }
+            });
+
+            // Admin-Password-Dialog Setup
+            document.getElementById('admin-login-btn').addEventListener('click', () => {
+                const password = document.getElementById('admin-password').value;
+                if (password === ADMIN_CONFIG.PASSWORD) {
+                    document.getElementById('admin-password-dialog').style.display = 'none';
+                    openAdminPanel();
+                } else {
+                    alert('Falsches Passwort!');
+                }
+            });
+
+            document.getElementById('admin-cancel-btn').addEventListener('click', () => {
+                document.getElementById('admin-password-dialog').style.display = 'none';
+            });
+
+            document.getElementById('admin-password').addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    document.getElementById('admin-login-btn').click();
+                } else if (e.key === 'Escape') {
+                    document.getElementById('admin-cancel-btn').click();
+                }
+            });
+
+            // Admin-Panel-Schließen-Button
+            document.getElementById('admin-close-btn').addEventListener('click', () => {
+                closeAdminPanel();
+            });
+
+            // God-Mode-Button
+            document.getElementById('admin-god-mode-btn').addEventListener('click', () => {
+                ADMIN_CONFIG.GOD_MODE = !ADMIN_CONFIG.GOD_MODE;
+                const button = document.getElementById('admin-god-mode-btn');
+                button.textContent = `God-Mode: ${ADMIN_CONFIG.GOD_MODE ? 'AN' : 'AUS'}`;
+                button.style.background = ADMIN_CONFIG.GOD_MODE ? '#27ae60' : '#f39c12';
+
+                // NEU: Sofortiges Senden des God-Mode-Status an Server
+                // Mit Fehlerbehandlung falls socket noch nicht bereit
+                if (socket && player) {
+                    try {
+                        console.log("Sende God-Mode-Status an Server:", ADMIN_CONFIG.GOD_MODE);
+                        socket.emit('toggle_god_mode', ADMIN_CONFIG.GOD_MODE);
+                    } catch (e) {
+                        console.error("Fehler beim Senden des God-Mode-Status:", e);
+                    }
+                } else {
+                    console.warn("Socket oder Player nicht bereit für God-Mode-Änderung");
+                }
+
+                // Benachrichtigung
+                createNotification(`God-Mode ${ADMIN_CONFIG.GOD_MODE ? 'aktiviert' : 'deaktiviert'}`);
+            });
+
+            // Bot-Spawn-Button
+            document.getElementById('admin-spawn-bot-btn').addEventListener('click', () => {
+                // Bot-Spawn-Befehl an Server senden
+                socket.emit('admin_spawn_bot');
+                createNotification('Bot gespawnt');
+            });
+
+            // Level-Geben-Button
+            document.getElementById('admin-give-level-btn').addEventListener('click', () => {
+                if (!ADMIN_CONFIG.SELECTED_PLAYER_ID) {
+                    createNotification('Bitte wähle zuerst einen Spieler aus', 2000);
+                    return;
+                }
+
+                const levels = parseInt(document.getElementById('admin-level-input').value, 10);
+                if (isNaN(levels) || levels < 1) {
+                    createNotification('Bitte gebe eine gültige Level-Anzahl ein', 2000);
+                    return;
+                }
+
+                // Level-Befehl an Server senden
+                socket.emit('admin_give_levels', {
+                    playerId: ADMIN_CONFIG.SELECTED_PLAYER_ID,
+                    levels: levels
+                });
+
+                createNotification(`${levels} Level an ${players[ADMIN_CONFIG.SELECTED_PLAYER_ID]?.name || 'Spieler'} gegeben`);
+            });
+
+            // Spieler-Töten-Button
+            document.getElementById('admin-kill-player-btn').addEventListener('click', () => {
+                if (!ADMIN_CONFIG.SELECTED_PLAYER_ID) {
+                    createNotification('Bitte wähle zuerst einen Spieler aus', 2000);
+                    return;
+                }
+
+                if (ADMIN_CONFIG.SELECTED_PLAYER_ID === socket.id) {
+                    createNotification('Du kannst dich nicht selbst töten', 2000);
+                    return;
+                }
+
+                // Kill-Befehl an Server senden
+                socket.emit('admin_kill_player', {
+                    playerId: ADMIN_CONFIG.SELECTED_PLAYER_ID
+                });
+
+                createNotification(`Spieler ${players[ADMIN_CONFIG.SELECTED_PLAYER_ID]?.name || 'unbekannt'} wurde eliminiert`);
+            });
+
+            // Admin-Panel öffnen
+            function openAdminPanel() {
+                document.getElementById('admin-panel').style.display = 'block';
+                updateAdminPlayersUI();
+                initAdminMap();
+                adminMapInterval = setInterval(updateAdminMap, 100);
+            }
+
+            // Admin-Panel schließen
+            function closeAdminPanel() {
+                document.getElementById('admin-panel').style.display = 'none';
+                if (adminMapInterval) {
+                    clearInterval(adminMapInterval);
+                    adminMapInterval = null;
+                }
+            }
+
+            // Admin-Spielerliste aktualisieren
+            function updateAdminPlayersUI() {
+                const playersList = document.getElementById('admin-players-list');
+                playersList.innerHTML = '';
+
+                // Alle Spieler sortieren (nach ID wenn lokal, dann Bots)
+                const sortedPlayers = Object.values(players).sort((a, b) => {
+                    // Admin immer an erster Stelle
+                    if (a.id === socket.id) return -1;
+                    if (b.id === socket.id) return 1;
+
+                    // Dann nach Bot-Status sortieren
+                    if (a.isBot && !b.isBot) return 1;
+                    if (!a.isBot && b.isBot) return -1;
+
+                    // Bei gleichem Status nach Level sortieren
+                    return b.level - a.level;
+                });
+
+                // Spielerliste erstellen
+                sortedPlayers.forEach(player => {
+                    const playerDiv = document.createElement('div');
+                    playerDiv.className = 'admin-player-item';
+                    playerDiv.style.padding = '5px';
+                    playerDiv.style.marginBottom = '5px';
+                    playerDiv.style.cursor = 'pointer';
+                    playerDiv.style.borderRadius = '4px';
+                    playerDiv.style.background = player.id === ADMIN_CONFIG.SELECTED_PLAYER_ID ? '#3498db' : 'rgba(255, 255, 255, 0.1)';
+
+                    // Du selbst bzw. Admin markieren
+                    const isAdmin = player.id === socket.id;
+
+                    playerDiv.innerHTML = `
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="${isAdmin ? 'font-weight: bold; color: #f1c40f;' : ''}">${player.name} ${isAdmin ? '(DU)' : ''} ${player.isBot ? '[BOT]' : ''}</span>
+                            <span>Lvl ${player.level}</span>
+                        </div>
+                    `;
+
+                    playerDiv.addEventListener('click', () => {
+                        ADMIN_CONFIG.SELECTED_PLAYER_ID = player.id;
+                        updateAdminPlayersUI();
+                    });
+
+                    playersList.appendChild(playerDiv);
+                });
+            }
+
+            // Admin-Karte initialisieren
+            function initAdminMap() {
+                const adminMapCanvas = document.getElementById('admin-map-canvas');
+                adminMapCtx = adminMapCanvas.getContext('2d');
+            }
+
+            // Admin-Karte aktualisieren
+            function updateAdminMap() {
+                if (!adminMapCtx) return;
+
+                const mapCanvas = document.getElementById('admin-map-canvas');
+                const width = mapCanvas.width;
+                const height = mapCanvas.height;
+                const mapWidth = 4000; // Spielkartengröße anpassen
+                const mapHeight = 4000;
+
+                // Karte löschen
+                adminMapCtx.fillStyle = '#f5f5f5';
+                adminMapCtx.fillRect(0, 0, width, height);
+
+                // Raster zeichnen
+                adminMapCtx.strokeStyle = '#ddd';
+                adminMapCtx.lineWidth = 0.5;
+                const gridSize = 20;
+
+                for (let x = 0; x < width; x += gridSize) {
+                    adminMapCtx.beginPath();
+                    adminMapCtx.moveTo(x, 0);
+                    adminMapCtx.lineTo(x, height);
+                    adminMapCtx.stroke();
+                }
+
+                for (let y = 0; y < height; y += gridSize) {
+                    adminMapCtx.beginPath();
+                    adminMapCtx.moveTo(0, y);
+                    adminMapCtx.lineTo(width, y);
+                    adminMapCtx.stroke();
+                }
+
+                // Rahmen zeichnen
+                adminMapCtx.strokeStyle = '#333';
+                adminMapCtx.lineWidth = 1;
+                adminMapCtx.strokeRect(0, 0, width, height);
+
+                // Spieler zeichnen
+                for (const id in players) {
+                    const player = players[id];
+                    const isLocalPlayer = id === socket.id;
+                    const isSelectedPlayer = id === ADMIN_CONFIG.SELECTED_PLAYER_ID;
+
+                    // Spieler-Position auf Karte berechnen
+                    const playerX = (player.x / mapWidth) * width;
+                    const playerY = (player.y / mapHeight) * height;
+
+                    // Spieler zeichnen
+                    adminMapCtx.fillStyle = isLocalPlayer ? '#3498db' : (player.isBot ? '#e74c3c' : '#2ecc71');
+                    adminMapCtx.beginPath();
+                    adminMapCtx.arc(playerX, playerY, isSelectedPlayer ? 6 : 4, 0, Math.PI * 2);
+                    adminMapCtx.fill();
+
+                    // Blickrichtung zeichnen
+                    adminMapCtx.strokeStyle = isLocalPlayer ? '#3498db' : (player.isBot ? '#e74c3c' : '#2ecc71');
+                    adminMapCtx.beginPath();
+                    adminMapCtx.moveTo(playerX, playerY);
+                    adminMapCtx.lineTo(
+                        playerX + Math.cos(player.angle) * 10,
+                        playerY + Math.sin(player.angle) * 10
+                    );
+                    adminMapCtx.stroke();
+
+                    // Spielername zeichnen
+                    if (isLocalPlayer || isSelectedPlayer) {
+                        adminMapCtx.fillStyle = '#333';
+                        adminMapCtx.font = '10px Arial';
+                        adminMapCtx.textAlign = 'center';
+                        adminMapCtx.fillText(player.name, playerX, playerY - 8);
+                    }
+                }
+            }
+
+            // Vor dem Verlassen der Seite Spieldaten senden
+            window.addEventListener('beforeunload', () => {
+                if (playerToken && player) {
+                    // Sende Spielstatistiken
+                    const gameTime = (Date.now() - gameStartTime) / 1000; // in Sekunden
+
+                    // Benutze sendBeacon statt fetch, da es zuverlässiger bei unload events ist
+                    navigator.sendBeacon(`https://nm-web.de/game_end.php?token=${playerToken}`, 
+                        JSON.stringify({
+                            playtime: gameTime,
+                            kills: player.kills || 0,
+                            max_level: player.level || 1,
+                            score: player.score || 0
+                        })
+                    );
+                }
+            });
+        </script>
+    </body>
+</html>

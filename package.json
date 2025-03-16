@@ -1,0 +1,14 @@
+{
+  "name": "tank-io-game",
+  "version": "1.0.0",
+  "description": "Multiplayer Tank Game",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "express": "^4.17.1",
+    "socket.io": "^4.5.1",
+    "cors": "^2.8.5"
+  }
+}

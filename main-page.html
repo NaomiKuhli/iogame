@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Tank.io</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.3));
+            margin: 0;
+        }
+        .menu {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 0 20px rgba(0,0,0,0.2);
+        }
+        input {
+            padding: 10px;
+            font-size: 18px;
+            margin: 20px 0;
+            width: 250px;
+        }
+        button {
+            background: #0087ff;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="menu">
+        <h1>Tank.io</h1>
+        <input type="text" id="player-name" placeholder="Gib deinen Namen ein">
+        <button onclick="playGame()">Spielen!</button>
+    </div>
+
+    <script>
+        function playGame() {
+            const playerName = document.getElementById('player-name').value.trim() || 'Spieler';
+            window.open('https://48aad939-89e7-405b-8643-e020c5420008-00-thttn2suxj9x.riker.replit.dev/?name=' + 
+                encodeURIComponent(playerName), '_blank');
+        }
+    </script>
+    
+</body>
+</html>
