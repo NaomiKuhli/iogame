@@ -552,6 +552,7 @@ io.on('connection', (socket) => {
                     // Punkte an Spieler vergeben
                     player.score += block.points * 10;
 
+                    const gainedXp = block.xp;
                     checkLevelUp(player, gainedXp);
 
                     // Block an neuer Position respawnen
