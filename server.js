@@ -165,40 +165,40 @@ io.on('connection', (socket) => {
     // Spieler beitritt verarbeiten
     socket.on('join', (data) => {
         console.log("Spieler verbindet sich:", data);
-        
+
         // Falls kein Data-Objekt übergeben wird, erstellen wir eines
         if (!data) data = {};
-    
+
         // Spielername aus den Daten oder der URL-Query
         const query = socket.handshake.query;
         const playerName = data.name || query.name || 'Unbenannt';
-        
+
         // Upgrade-Informationen und Token extrahieren
         let upgradeCode = null;
         let userToken = null;
-        
+
         if (data && data.token) {
             userToken = data.token;
             console.log(`Spieler mit Token beigetreten: ${playerName}`);
         }
-        
+
         if (data && data.upgrade) {
             upgradeCode = data.upgrade;
             console.log(`Spieler ${playerName} möchte Upgrade verwenden: ${upgradeCode}`);
         }
-    
+
         // Voreinstellungen für Spieler festlegen
         let startLevel = 1;
         let startUpgrades = 0;
         let hasGodMode = false;
         let hasDoubleXP = false;
         let hasDoubleCannon = false;
-        
+
         // Upgrade-Effekte vorbereiten, wenn vorhanden
         if (upgradeCode) {
             console.log(`Verarbeite Upgrade: ${upgradeCode}`);
-            
-            switch(upgradeCode) {
+
+            switch (upgradeCode) {
                 case 'start_level_5':
                     startLevel = 5;
                     startUpgrades = 4;
@@ -220,7 +220,7 @@ io.on('connection', (socket) => {
                     console.log(`Unbekanntes Upgrade: ${upgradeCode}`);
             }
         }
-    
+
         // Neuen Spieler erstellen mit vorbereiteten Werten
         const player = {
             id: socket.id,
@@ -258,10 +258,10 @@ io.on('connection', (socket) => {
             token: userToken,
             joinTime: Date.now()
         };
-    
+
         // Spieler zum Spiel hinzufügen
         players[socket.id] = player;
-    
+
         // God-Mode-Timer starten, wenn aktiviert
         if (hasGodMode) {
             console.log(`God Mode Timer für ${playerName} gestartet (30s)`);
@@ -273,17 +273,17 @@ io.on('connection', (socket) => {
                 }
             }, 30000);
         }
-    
+
         // Initialen Spielzustand an Spieler senden
         socket.emit('init', {
             player,
             players,
             blocks
         });
-    
+
         // Neuen Spieler an alle anderen Spieler senden
         socket.broadcast.emit('playerJoined', player);
-    
+
         // Bestenliste aktualisieren
         updateLeaderboard();
     });
@@ -564,12 +564,8 @@ io.on('connection', (socket) => {
                     // Punkte an Spieler vergeben
                     player.score += block.points * 10;
 
-                    // XP vergeben und Level prüfen
                     const gainedXp = block.xp;
-                    player.xp += gainedXp;
-                    player.totalXp += gainedXp;
-
-                    // Prüfen, ob Level-Aufstieg
+     
                     checkLevelUp(player);
 
                     // Block an neuer Position respawnen
@@ -702,10 +698,16 @@ io.on('connection', (socket) => {
 
 
 // Level-Up Funktion
-function checkLevelUp(player) {
+function checkLevelUp(player, gainedXp = 0) {
     // Falls XP-Multiplikator existiert, anwenden
-    if (player.xpMultiplier) {
+    if (player.xpMultiplier && gainedXp > 0) {
         gainedXp *= player.xpMultiplier;
+    }
+
+    // XP zum Spieler hinzufügen
+    if (gainedXp > 0) {
+        player.xp += gainedXp;
+        player.totalXp += gainedXp;
     }
 
     if (player.xp >= player.xpToNextLevel) {
@@ -731,7 +733,7 @@ function checkLevelUp(player) {
 
         // Rekursiv prüfen, ob mehrere Level auf einmal aufgestiegen
         if (player.xp >= player.xpToNextLevel) {
-            checkLevelUp(player);
+            checkLevelUp(player, 0); // Kein zusätzliches XP bei rekursivem Aufruf
         }
     }
 }
@@ -962,6 +964,8 @@ function checkPlayerBotCollisions() {
                     player.totalXp += xpGain;
 
                     // Levelaufstieg prüfen
+                    const gainedXp = block.xp;
+  
                     checkLevelUp(player);
 
                     // Spieler über XP-Gewinn informieren
@@ -1098,7 +1102,7 @@ function updateBullets() {
                         });
 
                         // Prüfen, ob Level-Aufstieg
-                        checkLevelUp(player);
+                        checkLevelUp(player, gainedXp);
                     }
 
                     // Block an zufälliger Position respawnen
