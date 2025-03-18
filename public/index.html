@@ -28,27 +28,13 @@
                 display: block;
             }
 
-            /* Improved Minimap - smaller for mobile */
             #minimap-container {
                 position: absolute;
                 top: 10px;
                 left: 10px;
                 background: rgba(0, 0, 0, 0.2);
-                padding: 3px;
-                border-radius: 3px;
-                transform-origin: top left;
-                z-index: 5;
-            }
-            
-            /* Scale minimap differently on mobile */
-            @media (max-width: 767px) {
-                #minimap-container {
-                    transform: scale(0.8);
-                }
-                #minimap-canvas {
-                    width: 120px !important;
-                    height: 120px !important;
-                }
+                padding: 5px;
+                border-radius: 5px;
             }
 
             #debug-info {
@@ -63,44 +49,34 @@
                 display: none;
             }
 
-            /* Improved Leaderboard - smaller and more transparent for mobile */
+            /* Leaderboard Styling */
             #leaderboard {
                 position: absolute;
                 top: 10px;
                 right: 10px;
-                width: 180px;
-                background: rgba(0, 0, 0, 0.4);
+                width: 200px;
+                background: rgba(0, 0, 0, 0.5);
                 border-radius: 5px;
-                padding: 6px;
+                padding: 8px;
                 color: white;
-                transform-origin: top right;
-                z-index: 5;
-            }
-            
-            /* Scale leaderboard for mobile */
-            @media (max-width: 767px) {
-                #leaderboard {
-                    transform: scale(0.8);
-                    width: 150px;
-                }
             }
 
             .leaderboard-title {
                 text-align: center;
                 margin-top: 0;
                 margin-bottom: 5px;
-                font-size: 14px;
+                font-size: 16px;
             }
 
             .leaderboard-item {
                 display: flex;
                 justify-content: space-between;
                 margin-bottom: 3px;
-                font-size: 12px;
+                font-size: 13px;
             }
 
             .leaderboard-name {
-                max-width: 110px;
+                max-width: 120px;
                 overflow: hidden;
                 text-overflow: ellipsis;
                 white-space: nowrap;
@@ -111,25 +87,24 @@
                 margin-right: 5px;
             }
 
-            /* XP-Bar Styling - adjusted position for mobile */
+            /* XP-Bar Styling (Diep.io Style) */
             #xp-bar-container {
                 position: absolute;
                 bottom: 0;
                 left: 0;
                 width: 100%;
-                height: 20px;
-                background: none;
+                height: 24px;
+                background: none; /* Entferne den schwarzen Hintergrund */
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                z-index: 4;
             }
 
             #xp-bar-wrapper {
-                width: 70%;
-                height: 14px;
+                width: 60%;
+                height: 16px;
                 background: rgba(0, 0, 0, 0.4);
-                border-radius: 7px;
+                border-radius: 8px;
                 overflow: hidden;
                 position: relative;
             }
@@ -151,7 +126,7 @@
                 align-items: center;
                 justify-content: center;
                 color: white;
-                font-size: 10px;
+                font-size: 12px;
                 font-weight: bold;
                 text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
             }
@@ -164,18 +139,18 @@
                 z-index: 10;
             }
 
-            /* NEUE STYLE-REGELN FÜR UPGRADES UND UI - kompakter für mobile */
+            /* NEUE STYLE-REGELN FÜR UPGRADES UND UI */
             .level-number {
                 display: inline-block;
                 background-color: #3498db;
                 color: white;
-                font-size: 10px;
-                width: 16px;
-                height: 16px;
-                line-height: 16px;
+                font-size: 11px;
+                width: 18px;
+                height: 18px;
+                line-height: 18px;
                 text-align: center;
-                border-radius: 8px;
-                margin-left: 4px;
+                border-radius: 9px;
+                margin-left: 5px;
                 font-weight: bold;
             }
 
@@ -189,9 +164,9 @@
 
             /* Verbesserte Upgrade-Buttons */
             .upgrade-button {
-                width: 24px;
-                height: 18px;
-                line-height: 18px;
+                width: 30px;
+                height: 20px;
+                line-height: 20px;
                 text-align: center;
                 background: #3498db;
                 border-radius: 3px;
@@ -214,11 +189,11 @@
 
             /* Verbessertes Upgrade-Item */
             .upgrade-item {
-                margin-bottom: 6px;
+                margin-bottom: 8px;
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
-                padding: 2px;
+                padding: 3px;
                 border-radius: 4px;
                 transition: background-color 0.2s ease;
             }
@@ -229,18 +204,18 @@
 
             .upgrade-name {
                 display: inline-block;
-                width: 110px;
-                font-size: 12px;
+                width: 130px;
+                font-size: 14px;
             }
 
             /* Verbesserte Level-Leiste */
             .level-indicator {
                 display: inline-block;
-                width: 60px;
-                height: 8px;
+                width: 70px;
+                height: 10px;
                 background: #333;
-                margin-right: 8px;
-                border-radius: 4px;
+                margin-right: 10px;
+                border-radius: 5px;
                 overflow: hidden;
                 box-shadow: inset 0 1px 3px rgba(0,0,0,0.3);
             }
@@ -249,39 +224,29 @@
             #upgrade-menu {
                 position: absolute;
                 left: 10px;
-                bottom: 28px;
-                width: 210px;
+                bottom: 10px;
+                width: 240px;
                 background: rgba(0, 0, 0, 0.7);
-                border-radius: 8px;
-                padding: 8px;
+                border-radius: 10px;
+                padding: 12px;
                 color: white;
                 display: none;
-                font-size: 11px;
+                font-size: 13px;
                 backdrop-filter: blur(5px);
                 box-shadow: 0 4px 10px rgba(0,0,0,0.3);
                 border: 1px solid rgba(255,255,255,0.1);
-                z-index: 4;
-                transform-origin: bottom left;
-            }
-
-            /* Scale upgrade menu on mobile */
-            @media (max-width: 767px) {
-                #upgrade-menu {
-                    transform: scale(0.85);
-                    bottom: 170px;
-                }
             }
 
             #upgrade-status {
-                margin-top: 8px;
-                font-size: 11px;
+                margin-top: 10px;
+                font-size: 12px;
                 text-align: center;
-                padding: 3px;
+                padding: 4px;
                 background: rgba(0,0,0,0.2);
                 border-radius: 4px;
             }
 
-            /* Death screen adjustments for mobile */
+            /* Death screen (Diep.io Style) */
             #death-screen {
                 position: fixed;
                 top: 0;
@@ -300,17 +265,15 @@
                 transform: translate(-50%, -50%);
                 text-align: center;
                 color: white;
-                width: 90%;
-                max-width: 500px;
             }
 
             #death-title {
-                font-size: 22px;
+                font-size: 26px;
                 margin-bottom: 5px;
             }
 
             #death-killer {
-                font-size: 28px;
+                font-size: 32px;
                 color: #f39c12;
                 margin-top: 5px;
                 margin-bottom: 15px;
@@ -318,20 +281,20 @@
 
             #death-stats {
                 background: rgba(0, 0, 0, 0.6);
-                padding: 15px;
+                padding: 20px;
                 border-radius: 10px;
-                margin-bottom: 15px;
+                margin-bottom: 20px;
             }
 
             .death-stat-row {
                 display: flex;
                 justify-content: space-between;
-                margin-bottom: 8px;
+                margin-bottom: 10px;
             }
 
             .death-stat-label, .death-stat-value {
                 font-weight: bold;
-                font-size: 16px;
+                font-size: 18px;
             }
 
             #death-achievement {
@@ -344,7 +307,7 @@
 
             #death-achievement-title {
                 font-weight: bold;
-                font-size: 14px;
+                font-size: 16px;
                 margin-bottom: 5px;
             }
 
@@ -366,8 +329,8 @@
             /* Styling für Missionen im Death Screen */
             .death-mission-item {
                 background: rgba(0, 0, 0, 0.3);
-                padding: 6px 10px;
-                margin-bottom: 6px;
+                padding: 8px 12px;
+                margin-bottom: 8px;
                 border-radius: 5px;
                 text-align: left;
             }
@@ -375,15 +338,15 @@
             .death-mission-progress {
                 display: flex;
                 align-items: center;
-                margin-top: 4px;
+                margin-top: 5px;
             }
 
             .death-mission-bar {
                 flex-grow: 1;
-                height: 6px;
+                height: 8px;
                 background: rgba(0, 0, 0, 0.4);
-                border-radius: 3px;
-                margin-right: 8px;
+                border-radius: 4px;
+                margin-right: 10px;
                 overflow: hidden;
             }
 
@@ -398,9 +361,9 @@
             }
 
             .death-mission-status {
-                font-size: 11px;
+                font-size: 12px;
                 color: white;
-                min-width: 50px;
+                min-width: 60px;
                 text-align: right;
             }
 
@@ -417,35 +380,33 @@
 
             .death-coins-earned {
                 color: #f1c40f;
-                font-size: 22px;
+                font-size: 24px;
                 font-weight: bold;
-                margin: 12px 0;
+                margin: 15px 0;
                 display: flex;
                 justify-content: center;
                 align-items: center;
             }
 
-            /* IMPROVED MOBILE CONTROLS */
+            /* Mobile Steuerung */
             .mobile-controls {
                 display: none; /* Standardmäßig ausgeblendet */
                 position: fixed;
                 bottom: 0;
                 left: 0;
                 width: 100%;
-                height: 35%;
+                height: 40%;
                 z-index: 100;
                 pointer-events: none; /* Erlaubt Events, die durch diese Ebene gehen */
             }
 
-            /* Left joystick for movement */
             .joystick-area {
                 position: absolute;
                 bottom: 20px;
                 left: 20px;
-                width: 130px;
-                height: 130px;
-                background-color: rgba(255, 255, 255, 0.08);
-                border: 2px solid rgba(255, 255, 255, 0.2);
+                width: 150px;
+                height: 150px;
+                background-color: rgba(255, 255, 255, 0.1);
                 border-radius: 50%;
                 pointer-events: auto; /* Fängt Events ab */
                 touch-action: none; /* Verhindert Standard-Touch-Aktionen */
@@ -453,25 +414,22 @@
 
             .joystick-thumb {
                 position: absolute;
-                width: 50px;
-                height: 50px;
-                background-color: rgba(255, 255, 255, 0.3);
-                border: 2px solid rgba(255, 255, 255, 0.5);
+                width: 60px;
+                height: 60px;
+                background-color: rgba(255, 255, 255, 0.4);
                 border-radius: 50%;
-                left: 40px;
-                top: 40px;
+                left: 45px;
+                top: 45px;
                 pointer-events: none; /* Ignoriert Events */
             }
 
-            /* Right area for aiming/firing */
             .fire-area {
                 position: absolute;
                 bottom: 20px;
                 right: 20px;
-                width: 130px;
-                height: 130px;
-                background-color: rgba(255, 255, 255, 0.08);
-                border: 2px solid rgba(255, 255, 255, 0.2);
+                width: 150px;
+                height: 150px;
+                background-color: rgba(255, 255, 255, 0.1);
                 border-radius: 50%;
                 pointer-events: auto; /* Fängt Events ab */
                 touch-action: none; /* Verhindert Standard-Touch-Aktionen */
@@ -479,14 +437,13 @@
 
             .fire-button {
                 position: absolute;
-                width: 50px;
-                height: 50px;
-                background-color: rgba(255, 0, 0, 0.3);
-                border: 2px solid rgba(255, 50, 50, 0.5);
+                width: 60px;
+                height: 60px;
+                background-color: rgba(255, 0, 0, 0.4);
                 border-radius: 50%;
-                left: 40px;
-                top: 40px;
-                pointer-events: none; /* Ignoriert Events */
+                left: 45px;
+                top: 45px;
+                pointer-events: auto; /* Fängt Events ab */
             }
 
             .fire-lines {
@@ -519,30 +476,6 @@
                 transform: translateY(-50%);
             }
 
-            /* Auto-fire button */
-            .auto-fire-btn {
-                position: absolute;
-                top: 20px;
-                right: 20px;
-                width: 50px;
-                height: 50px;
-                background-color: rgba(255, 0, 0, 0.2);
-                border: 2px solid rgba(255, 255, 255, 0.3);
-                border-radius: 50%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                color: white;
-                font-size: 11px;
-                text-align: center;
-                pointer-events: auto;
-            }
-            
-            .auto-fire-btn.active {
-                background-color: rgba(255, 0, 0, 0.5);
-                border-color: rgba(255, 255, 255, 0.7);
-            }
-
             /* Für Tablets und größere Bildschirme anpassen */
             @media (min-width: 768px) and (max-width: 1024px) {
                 .joystick-area, .fire-area {
@@ -550,11 +483,11 @@
                     height: 120px;
                 }
                 
-                .joystick-thumb, .fire-button {
-                    width: 48px;
-                    height: 48px;
-                    left: 36px;
-                    top: 36px;
+                .joystick-thumb {
+                    width: 50px;
+                    height: 50px;
+                    left: 35px;
+                    top: 35px;
                 }
             }
 
@@ -574,17 +507,7 @@
             /* XP-Bar Anpassung für mobile Geräte */
             @media (max-width: 767px) {
                 #xp-bar-container {
-                    bottom: 145px;
-                    height: 16px;
-                }
-                
-                #xp-bar-wrapper {
-                    width: 80%;
-                    height: 12px;
-                }
-                
-                #xp-text {
-                    font-size: 8px;
+                    bottom: 180px;
                 }
             }
         </style>
@@ -604,7 +527,7 @@
             <div id="leaderboard-items">
                 <!-- Wird dynamisch befüllt -->
             </div>
-            <div id="players-count" style="text-align: right; margin-top: 2px; font-size: 9px; color: #aaa;">Spieler: 1</div>
+            <div id="players-count" style="text-align: right; margin-top: 2px; font-size: 10px; color: #aaa;">Spieler: 1</div>
         </div>
 
         <!-- XP-Bar (Diep.io Style) -->
@@ -617,7 +540,7 @@
 
         <!-- Upgrade-Menü mit verbesserten Level-Anzeigen -->
         <div id="upgrade-menu">
-            <h3 style="margin-top: 0; text-align: center; font-size: 13px;">Upgrades</h3>
+            <h3 style="margin-top: 0; text-align: center;">Upgrades</h3>
             <div class="upgrade-item">
                 <span class="upgrade-name">Health Regen <span class="level-number" id="healthRegen-number">1</span></span>
                 <div class="level-indicator"><div class="level-filled" id="healthRegen-level" style="width: 10%;"></div></div>
@@ -661,7 +584,7 @@
             <div id="upgrade-status">Verfügbare Punkte: 0 | Upgrades: 0/45</div>
         </div>
 
-        <!-- Death Screen (Diep.io Style) -->
+        <!-- NEU: Death Screen (Diep.io Style) -->
         <div id="death-screen">
             <div class="death-content">
                 <h2 id="death-title">You were killed by</h2>
@@ -703,27 +626,64 @@
             </div>
         </div>
 
-        <!-- Admin Panel -->
-        <div id="admin-panel" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0, 0, 0, 0.85); padding: 20px; border-radius: 10px; z-index: 1000; color: white; width: 90%; max-width: 600px; height: 400px; box-shadow: 0 0 30px rgba(0, 0, 0, 0.7);">
-            <!-- Admin panel content -->
-            <button id="admin-close-btn" style="background: #e74c3c; color: white; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer;">Schließen</button>
+        <!-- Admin Panel (überarbeitet, kein Passwort-Dialog mehr) -->
+        <div id="admin-panel" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0, 0, 0, 0.85); padding: 20px; border-radius: 10px; z-index: 1000; color: white; width: 600px; height: 400px; box-shadow: 0 0 30px rgba(0, 0, 0, 0.7);">
+            <h2 style="text-align: center; margin-top: 0;">Admin Panel</h2>
+
+            <div style="display: flex; height: calc(100% - 60px);">
+                <!-- Linke Seite - Spieler-Liste und Kontrollen -->
+                <div style="flex: 1; padding-right: 10px; border-right: 1px solid #555; overflow-y: auto;">
+                    <h3>Spieler</h3>
+                    <div id="admin-players-list" style="margin-bottom: 15px; max-height: 150px; overflow-y: auto;">
+                        <!-- Wird dynamisch befüllt -->
+                    </div>
+
+                    <div style="margin-top: 15px;">
+                        <h3>Aktionen</h3>
+                        <div style="margin-bottom: 10px;">
+                            <label for="admin-level-input">Level geben:</label>
+                            <input type="number" id="admin-level-input" value="1" min="1" max="100" style="width: 60px; margin-left: 5px;">
+                            <button id="admin-give-level-btn" style="background: #2ecc71; color: white; border: none; padding: 5px 10px; margin-left: 5px; border-radius: 4px; cursor: pointer;">Geben</button>
+                        </div>
+
+                        <div style="margin-bottom: 10px;">
+                            <button id="admin-kill-player-btn" style="background: #e74c3c; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; width: 100%;">Spieler töten</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Rechte Seite - Admin Funktionen und Karte -->
+                <div style="flex: 1; padding-left: 10px;">
+                    <h3>Admin Kontrollen</h3>
+                    <div style="margin-bottom: 10px;">
+                        <button id="admin-god-mode-btn" style="background: #f39c12; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; width: 100%;">God-Mode: AUS</button>
+                    </div>
+
+                    <div style="margin-bottom: 10px;">
+                        <button id="admin-spawn-bot-btn" style="background: #3498db; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; width: 100%;">Bot spawnen</button>
+                    </div>
+
+                    <div style="margin-top: 20px;">
+                        <h3>Spielerkarte</h3>
+                        <canvas id="admin-map-canvas" width="250" height="150" style="background: #f5f5f5; border: 1px solid #333;"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 15px;">
+                <button id="admin-close-btn" style="background: #e74c3c; color: white; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer;">Schließen</button>
+            </div>
         </div>
 
-        <!-- IMPROVED Mobile Controls -->
+        <!-- Mobile Steuerung -->
         <div class="mobile-controls" id="mobile-controls">
-            <!-- Left joystick for movement -->
             <div class="joystick-area" id="joystick-area">
                 <div class="joystick-thumb" id="joystick-thumb"></div>
             </div>
-            
-            <!-- Right area for aiming/firing -->
             <div class="fire-area" id="fire-area">
                 <div class="fire-lines"></div>
                 <div class="fire-button" id="fire-button"></div>
             </div>
-            
-            <!-- Auto-fire toggle button -->
-            <div class="auto-fire-btn" id="auto-fire-btn">AUTO</div>
         </div>
 
         <script src="/socket.io/socket.io.js"></script>
@@ -814,7 +774,7 @@
             // Spielkonstanten
             const PLAYER_BASE_SIZE = 25;
             const BULLET_BASE_SIZE = 15;
-            const GAME_WIDTH = 4000;
+            const GAME_WIDTH = 4000; // Für Map-Grenzen-Berechnung
             const GAME_HEIGHT = 4000;
 
             // Game-Variablen
@@ -824,33 +784,14 @@
             let bullets = [];
             let blocks = [];
             let camera = { x: 0, y: 0 };
-            
-            // Camera/Zoom settings
-            let cameraZoomFactor = 1; // Default zoom is 1 (no zoom)
-            
-            // Set zoom factor based on device type
-            function setCameraZoom() {
-                // Check if mobile
-                const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 767;
-                if (isMobile) {
-                    // Zoom out more on mobile to see more of the game
-                    cameraZoomFactor = 1.5; // Zoom out - higher number means more of the map is visible
-                } else {
-                    cameraZoomFactor = 1.1; // Slight zoom out on desktop
-                }
-                console.log("Camera zoom factor set to:", cameraZoomFactor);
-            }
-            
-            // Set initial zoom
-            setCameraZoom();
 
-            // Death Screen Variablen
+            // NEU: Death Screen Variablen
             let gameStartTime = Date.now();
             let killerViewActive = false;
             let killerViewData = null;
 
             // Admin-Status und Funktionen
-            let isAdmin = false; 
+            let isAdmin = false; // Wird vom Server basierend auf Datenbank gesetzt
 
             // Die ADMIN_CONFIG Objekt ohne Passwort
             const ADMIN_CONFIG = {
@@ -896,7 +837,6 @@
                 notification.style.borderRadius = '4px';
                 notification.style.zIndex = '1000';
                 notification.style.transition = 'opacity 0.5s';
-                notification.style.fontSize = window.innerWidth <= 767 ? '12px' : '14px';
 
                 document.body.appendChild(notification);
 
@@ -949,12 +889,9 @@
                     div.innerHTML = `<span>${i + 1}. ---</span><span>---</span>`;
                     leaderboardItems.appendChild(div);
                 }
-                
-                // Update player count
-                document.getElementById("players-count").textContent = `Spieler: ${Object.keys(players).length}`;
             }
 
-            // Upgrade-UI aktualisieren
+            // VERBESSERTE Upgrade-UI aktualisieren
             function updateUpgradeUI() {
                 if (!player) return;
 
@@ -1034,12 +971,9 @@
                 canvas.height = window.innerHeight;
                 particleCanvas.width = window.innerWidth;
                 particleCanvas.height = window.innerHeight;
-                
-                // Readjust camera zoom on resize
-                setCameraZoom();
             });
 
-            // Death Screen Funktionen
+            // NEU: Death Screen Funktionen
             function initTimeTracking() {
                 gameStartTime = Date.now();
             }
@@ -1161,9 +1095,6 @@
                 document.getElementById('leaderboard').style.display = 'none';
                 document.getElementById('xp-bar-container').style.display = 'none';
                 document.getElementById('upgrade-menu').style.display = 'none';
-
-                // Hide mobile controls
-                document.body.classList.add('controls-hidden');
 
                 // Missionen laden, falls angemeldet
                 if (playerToken) {
@@ -1438,6 +1369,7 @@
                         if (ADMIN_CONFIG.SELECTED_PLAYER_ID === playerId) {
                             ADMIN_CONFIG.SELECTED_PLAYER_ID = null;
                         }
+                        updateAdminPlayersUI();
                     }
 
                     // Einfache Heuristik: Wenn ein Spieler verschwindet und unsere Kugeln in der Nähe waren, zählt es als Kill
@@ -1455,9 +1387,6 @@
 
                 // Spielsteuerung einrichten
                 setupControls();
-
-                // Mobile Steuerung einrichten
-                setupMobileControls();
 
                 // Spielschleife starten
                 requestAnimationFrame(gameLoop);
@@ -1567,7 +1496,7 @@
                 }, 33);
             }
 
-            // Event-Listener für Admin-Menü
+            // Event-Listener für Admin-Menü (nur noch UI-Anzeige, keine Autorisierung)
             window.addEventListener('keydown', (e) => {
                 if (e.key === 'u') {
                     // Nur das Admin-Dialog anzeigen, wenn der Benutzer angemeldet ist
@@ -1576,6 +1505,9 @@
                         checkAdminStatus(playerToken, (isUserAdmin) => {
                             if (isUserAdmin) {
                                 document.getElementById('admin-panel').style.display = 'block';
+                                updateAdminPlayersUI();
+                                initAdminMap();
+                                adminMapInterval = setInterval(updateAdminMap, 100);
                             } else {
                                 createNotification('Kein Admin-Zugriff', 3000);
                             }
@@ -1587,11 +1519,104 @@
             });
 
             // Admin Panel schließen
-            document.getElementById('admin-close-btn').addEventListener('click', () => {
-                document.getElementById('admin-panel').style.display = 'none';
+            document.getElementById('admin-close-btn').addEventListener('click', closeAdminPanel);
+
+            // Admin-Aktionen über neue sichere Endpunkte senden
+            // God-Mode-Aktivierung
+            document.getElementById('admin-god-mode-btn').addEventListener('click', () => {
+                if (!isAdmin) {
+                    createNotification('Kein Admin-Zugriff', 3000);
+                    return;
+                }
+
+                ADMIN_CONFIG.GOD_MODE = !ADMIN_CONFIG.GOD_MODE;
+                const button = document.getElementById('admin-god-mode-btn');
+                button.textContent = `God-Mode: ${ADMIN_CONFIG.GOD_MODE ? 'AN' : 'AUS'}`;
+                button.style.background = ADMIN_CONFIG.GOD_MODE ? '#27ae60' : '#f39c12';
+
+                // Mit Token senden, um Autorisierung auf Server-Seite zu prüfen
+                if (socket && player && playerToken) {
+                    try {
+                        console.log("Sende God-Mode-Status an Server:", ADMIN_CONFIG.GOD_MODE);
+                        socket.emit('admin_toggle_god_mode', {
+                            token: playerToken,
+                            enabled: ADMIN_CONFIG.GOD_MODE
+                        });
+                    } catch (e) {
+                        console.error("Fehler beim Senden des God-Mode-Status:", e);
+                    }
+                }
+
+                createNotification(`God-Mode ${ADMIN_CONFIG.GOD_MODE ? 'aktiviert' : 'deaktiviert'}`);
             });
 
-            // IMPROVED: Spielschleife mit Unterstützung für Killer-View
+            // Bot-Spawn-Button
+            document.getElementById('admin-spawn-bot-btn').addEventListener('click', () => {
+                if (!isAdmin) {
+                    createNotification('Kein Admin-Zugriff', 3000);
+                    return;
+                }
+
+                // Bot-Spawn-Befehl an Server senden
+                socket.emit('admin_spawn_bot', { token: playerToken });
+                createNotification('Bot spawnen angefordert');
+            });
+
+            // Level-Geben-Button
+            document.getElementById('admin-give-level-btn').addEventListener('click', () => {
+                if (!isAdmin) {
+                    createNotification('Kein Admin-Zugriff', 3000);
+                    return;
+                }
+
+                if (!ADMIN_CONFIG.SELECTED_PLAYER_ID) {
+                    createNotification('Bitte wähle zuerst einen Spieler aus', 2000);
+                    return;
+                }
+
+                const levels = parseInt(document.getElementById('admin-level-input').value, 10);
+                if (isNaN(levels) || levels < 1) {
+                    createNotification('Bitte gebe eine gültige Level-Anzahl ein', 2000);
+                    return;
+                }
+
+                // Level-Befehl an Server senden
+                socket.emit('admin_give_levels', {
+                    token: playerToken,
+                    playerId: ADMIN_CONFIG.SELECTED_PLAYER_ID,
+                    levels: levels
+                });
+
+                createNotification(`${levels} Level an ${players[ADMIN_CONFIG.SELECTED_PLAYER_ID]?.name || 'Spieler'} gegeben`);
+            });
+
+            // Spieler-Töten-Button
+            document.getElementById('admin-kill-player-btn').addEventListener('click', () => {
+                if (!isAdmin) {
+                    createNotification('Kein Admin-Zugriff', 3000);
+                    return;
+                }
+
+                if (!ADMIN_CONFIG.SELECTED_PLAYER_ID) {
+                    createNotification('Bitte wähle zuerst einen Spieler aus', 2000);
+                    return;
+                }
+
+                if (ADMIN_CONFIG.SELECTED_PLAYER_ID === socket.id) {
+                    createNotification('Du kannst dich nicht selbst töten', 2000);
+                    return;
+                }
+
+                // Kill-Befehl an Server senden
+                socket.emit('admin_kill_player', {
+                    token: playerToken,
+                    playerId: ADMIN_CONFIG.SELECTED_PLAYER_ID
+                });
+
+                createNotification(`Spieler ${players[ADMIN_CONFIG.SELECTED_PLAYER_ID]?.name || 'unbekannt'} wurde eliminiert`);
+            });
+
+            // VERBESSERT: Spielschleife mit Unterstützung für Killer-View
             function gameLoop() {
                 if (player || killerViewActive) {
                     // Spielzustand aktualisieren
@@ -1613,9 +1638,9 @@
 
             // Spielzustand aktualisieren
             function update() {
-                // IMPROVED: Kamera auf Spieler zentrieren mit Zoom
-                camera.x = player.x - (canvas.width / 2 / cameraZoomFactor);
-                camera.y = player.y - (canvas.height / 2 / cameraZoomFactor);
+                // Kamera auf Spieler zentrieren
+                camera.x = player.x - canvas.width / 2;
+                camera.y = player.y - canvas.height / 2;
 
                 // Kollisionen prüfen
                 checkPlayerCollisions();
@@ -1625,8 +1650,9 @@
             function checkPlayerCollisions() {
                 if (!player) return;
 
-                // Bei aktiviertem God-Mode keine Kollisionsprüfung durchführen
+                // KORREKTUR: Explizit mit === true vergleichen
                 if (ADMIN_CONFIG && ADMIN_CONFIG.GOD_MODE === true) {
+                    // Bei aktiviertem God-Mode keine Kollisionsprüfung durchführen
                     return;
                 }
 
@@ -1822,7 +1848,7 @@
             function drawPlayer(player, isMainPlayer) {
                 const screenX = player.x - camera.x;
                 const screenY = player.y - camera.y;
-                const size = PLAYER_BASE_SIZE; // Kleiner die Spielerkreise
+                const size = PLAYER_BASE_SIZE; // Kleinere Spielerkreise (25px)
 
                 // Spieler-Körper
                 ctx.fillStyle = isMainPlayer ? "#3498db" : "#e74c3c";
@@ -1859,7 +1885,7 @@
 
                 // Gesundheitsleiste
                 const healthBarWidth = size * 2;
-                const healthBarHeight = 5; // Etwas kleiner
+                const healthBarHeight = 6;
                 const maxHealth = player.maxHealth || 100;
                 const healthPercent = player.health / maxHealth;
 
@@ -1867,7 +1893,7 @@
                 ctx.fillStyle = "#333";
                 ctx.fillRect(
                     screenX - healthBarWidth / 2,
-                    screenY + size + 8, // Etwas näher am Spieler
+                    screenY + size + 10,
                     healthBarWidth,
                     healthBarHeight,
                 );
@@ -1882,34 +1908,45 @@
                 }
                 ctx.fillRect(
                     screenX - healthBarWidth / 2,
-                    screenY + size + 8,
+                    screenY + size + 10,
                     healthBarWidth * healthPercent,
                     healthBarHeight,
                 );
 
-                // Kleinere Name/Level Anzeige
+                // Name
                 ctx.fillStyle = "#333";
-                ctx.font = "12px Arial";
+                ctx.font = "14px Arial";
                 ctx.textAlign = "center";
-                ctx.fillText(player.name, screenX, screenY + size + 22);
+                ctx.fillText(player.name, screenX, screenY + size + 25);
 
                 // Level
                 if (player.level) {
-                    ctx.font = "11px Arial";
-                    ctx.fillText("Lvl " + player.level, screenX, screenY + size + 35);
+                    ctx.fillText("Lvl " + player.level, screenX, screenY + size + 40);
                 }
             }
 
             function drawBullet(bullet) {
                 const screenX = bullet.x - camera.x;
                 const screenY = bullet.y - camera.y;
-                const size = bullet.size || 10;
+                const size = bullet.size || 10; // Größe aus Bullet-Objekt oder Standardwert
 
                 ctx.fillStyle =
                     bullet.ownerId === socket.id ? "#3498db" : "#e74c3c";
                 ctx.beginPath();
                 ctx.arc(screenX, screenY, size/2, 0, Math.PI * 2);
                 ctx.fill();
+
+                // Optional: Gesundheitsanzeige für Kugeln im Debug-Modus
+                if (debugMode && bullet.health !== undefined) {
+                    const healthPercent = bullet.health / bullet.penetration;
+                    ctx.fillStyle = healthPercent > 0.5 ? "#2ecc71" : "#e74c3c";
+                    ctx.fillRect(
+                        screenX - size/2,
+                        screenY + size/2 + 2,
+                        size * healthPercent,
+                        2
+                    );
+                }
             }
 
             function drawBlock(block) {
@@ -1960,7 +1997,7 @@
                     block.maxHealth !== undefined
                 ) {
                     const healthBarWidth = size;
-                    const healthBarHeight = 3; // Kleiner für mobile
+                    const healthBarHeight = 4;
                     const healthPercent = block.health / block.maxHealth;
 
                     // Hintergrund der Gesundheitsleiste
@@ -1984,12 +2021,16 @@
             }
 
             function drawUI() {
-                // Punktzahl anzeigen
+                // Punktzahl, etc. anzeigen
                 if (player) {
                     ctx.fillStyle = "#333";
-                    ctx.font = "bold 14px Arial";
+                    ctx.font = "bold 16px Arial";
                     ctx.textAlign = "start";
-                    ctx.fillText(`Score: ${player.score || 0}`, 20, 25);
+                    ctx.fillText(`Score: ${player.score || 0}`, 20, 30);
+
+                    if (player.points) {
+                        ctx.fillText(`Punkte: ${Math.floor(player.points)}`, 20, 55);
+                    }
                 }
             }
 
@@ -2001,8 +2042,8 @@
                 const minimapCtx = minimapCanvas.getContext("2d");
                 const minimapWidth = minimapCanvas.width;
                 const minimapHeight = minimapCanvas.height;
-                const mapWidth = GAME_WIDTH;
-                const mapHeight = GAME_HEIGHT;
+                const mapWidth = 4000; // Spielkartengröße anpassen
+                const mapHeight = 4000;
 
                 // Minimap löschen
                 minimapCtx.fillStyle = "#f5f5f5";
@@ -2030,12 +2071,12 @@
                 minimapCtx.lineWidth = 1;
                 minimapCtx.strokeRect(0, 0, minimapWidth, minimapHeight);
 
-                // Sichtfeld des Spielers mit Zoom-Berücksichtigung
+                // Sichtfeld des Spielers
                 if (player) {
                     const viewX = (player.x / mapWidth) * minimapWidth;
                     const viewY = (player.y / mapHeight) * minimapHeight;
-                    const viewW = (canvas.width / mapWidth / cameraZoomFactor) * minimapWidth;
-                    const viewH = (canvas.height / mapHeight / cameraZoomFactor) * minimapHeight;
+                    const viewW = (canvas.width / mapWidth) * minimapWidth;
+                    const viewH = (canvas.height / mapHeight) * minimapHeight;
 
                     minimapCtx.strokeStyle = "#333";
                     minimapCtx.strokeRect(
@@ -2072,33 +2113,178 @@
                     });
                 }
 
-                // Spieler zeichnen (alle Spieler anzeigen)
-                for (const id in players) {
-                    const p = players[id];
-                    const playerX = (p.x / mapWidth) * minimapWidth;
-                    const playerY = (p.y / mapHeight) * minimapHeight;
-                    
-                    // Eigener Spieler blau, andere rot
-                    minimapCtx.fillStyle = id === socket.id ? "#3498db" : "#e74c3c";
+                // Nur eigenen Spieler zeichnen (keine Gegner auf der Minimap)
+                if (player) {
+                    const playerX = (player.x / mapWidth) * minimapWidth;
+                    const playerY = (player.y / mapHeight) * minimapHeight;
+
+                    minimapCtx.fillStyle = "#3498db"; // Blau für eigenen Spieler
                     minimapCtx.beginPath();
-                    minimapCtx.arc(playerX, playerY, id === socket.id ? 3 : 2, 0, Math.PI * 2);
+                    minimapCtx.arc(playerX, playerY, 4, 0, Math.PI * 2);
                     minimapCtx.fill();
-                    
-                    // Blickrichtung des eigenen Spielers anzeigen
-                    if (id === socket.id) {
-                        minimapCtx.strokeStyle = "#3498db";
-                        minimapCtx.beginPath();
-                        minimapCtx.moveTo(playerX, playerY);
-                        minimapCtx.lineTo(
-                            playerX + Math.cos(p.angle) * 6,
-                            playerY + Math.sin(p.angle) * 6
-                        );
-                        minimapCtx.stroke();
+
+                    // Blickrichtung des Spielers anzeigen
+                    minimapCtx.strokeStyle = "#3498db";
+                    minimapCtx.beginPath();
+                    minimapCtx.moveTo(playerX, playerY);
+                    minimapCtx.lineTo(
+                        playerX + Math.cos(player.angle) * 8,
+                        playerY + Math.sin(player.angle) * 8
+                    );
+                    minimapCtx.stroke();
+                }
+            }
+
+            // Admin-Map-Variablen
+            let adminMapCtx = null;
+            let adminMapInterval = null;
+
+            // Admin-Panel öffnen
+            function openAdminPanel() {
+                document.getElementById('admin-panel').style.display = 'block';
+                updateAdminPlayersUI();
+                initAdminMap();
+                adminMapInterval = setInterval(updateAdminMap, 100);
+            }
+
+            // Admin-Panel schließen
+            function closeAdminPanel() {
+                document.getElementById('admin-panel').style.display = 'none';
+                if (adminMapInterval) {
+                    clearInterval(adminMapInterval);
+                    adminMapInterval = null;
+                }
+            }
+
+            // Admin-Spielerliste aktualisieren
+            function updateAdminPlayersUI() {
+                const playersList = document.getElementById('admin-players-list');
+                playersList.innerHTML = '';
+
+                // Alle Spieler sortieren (nach ID wenn lokal, dann Bots)
+                const sortedPlayers = Object.values(players).sort((a, b) => {
+                    // Admin immer an erster Stelle
+                    if (a.id === socket.id) return -1;
+                    if (b.id === socket.id) return 1;
+
+                    // Dann nach Bot-Status sortieren
+                    if (a.isBot && !b.isBot) return 1;
+                    if (!a.isBot && b.isBot) return -1;
+
+                    // Bei gleichem Status nach Level sortieren
+                    return b.level - a.level;
+                });
+
+                // Spielerliste erstellen
+                sortedPlayers.forEach(player => {
+                    const playerDiv = document.createElement('div');
+                    playerDiv.className = 'admin-player-item';
+                    playerDiv.style.padding = '5px';
+                    playerDiv.style.marginBottom = '5px';
+                    playerDiv.style.cursor = 'pointer';
+                    playerDiv.style.borderRadius = '4px';
+                    playerDiv.style.background = player.id === ADMIN_CONFIG.SELECTED_PLAYER_ID ? '#3498db' : 'rgba(255, 255, 255, 0.1)';
+
+                    // Du selbst bzw. Admin markieren
+                    const isAdmin = player.id === socket.id;
+
+                    playerDiv.innerHTML = `
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span style="${isAdmin ? 'font-weight: bold; color: #f1c40f;' : ''}">${player.name} ${isAdmin ? '(DU)' : ''} ${player.isBot ? '[BOT]' : ''}</span>
+                            <span>Lvl ${player.level}</span>
+                        </div>
+                    `;
+
+                    playerDiv.addEventListener('click', () => {
+                        ADMIN_CONFIG.SELECTED_PLAYER_ID = player.id;
+                        updateAdminPlayersUI();
+                    });
+
+                    playersList.appendChild(playerDiv);
+                });
+            }
+
+            // Admin-Karte initialisieren
+            function initAdminMap() {
+                const adminMapCanvas = document.getElementById('admin-map-canvas');
+                adminMapCtx = adminMapCanvas.getContext('2d');
+            }
+
+            // Admin-Karte aktualisieren
+            function updateAdminMap() {
+                if (!adminMapCtx) return;
+
+                const mapCanvas = document.getElementById('admin-map-canvas');
+                const width = mapCanvas.width;
+                const height = mapCanvas.height;
+                const mapWidth = 4000; // Spielkartengröße anpassen
+                const mapHeight = 4000;
+
+                // Karte löschen
+                adminMapCtx.fillStyle = '#f5f5f5';
+                adminMapCtx.fillRect(0, 0, width, height);
+
+                // Raster zeichnen
+                adminMapCtx.strokeStyle = '#ddd';
+                adminMapCtx.lineWidth = 0.5;
+                const gridSize = 20;
+
+                for (let x = 0; x < width; x += gridSize) {
+                    adminMapCtx.beginPath();
+                    adminMapCtx.moveTo(x, 0);
+                    adminMapCtx.lineTo(x, height);
+                    adminMapCtx.stroke();
+                }
+
+                for (let y = 0; y < height; y += gridSize) {
+                    adminMapCtx.beginPath();
+                    adminMapCtx.moveTo(0, y);
+                    adminMapCtx.lineTo(width, y);
+                    adminMapCtx.stroke();
+                }
+
+                // Rahmen zeichnen
+                adminMapCtx.strokeStyle = '#333';
+                adminMapCtx.lineWidth = 1;
+                adminMapCtx.strokeRect(0, 0, width, height);
+
+                // Spieler zeichnen
+                for (const id in players) {
+                    const player = players[id];
+                    const isLocalPlayer = id === socket.id;
+                    const isSelectedPlayer = id === ADMIN_CONFIG.SELECTED_PLAYER_ID;
+
+                    // Spieler-Position auf Karte berechnen
+                    const playerX = (player.x / mapWidth) * width;
+                    const playerY = (player.y / mapHeight) * height;
+
+                    // Spieler zeichnen
+                    adminMapCtx.fillStyle = isLocalPlayer ? '#3498db' : (player.isBot ? '#e74c3c' : '#2ecc71');
+                    adminMapCtx.beginPath();
+                    adminMapCtx.arc(playerX, playerY, isSelectedPlayer ? 6 : 4, 0, Math.PI * 2);
+                    adminMapCtx.fill();
+
+                    // Blickrichtung zeichnen
+                    adminMapCtx.strokeStyle = isLocalPlayer ? '#3498db' : (player.isBot ? '#e74c3c' : '#2ecc71');
+                    adminMapCtx.beginPath();
+                    adminMapCtx.moveTo(playerX, playerY);
+                    adminMapCtx.lineTo(
+                        playerX + Math.cos(player.angle) * 10,
+                        playerY + Math.sin(player.angle) * 10
+                    );
+                    adminMapCtx.stroke();
+
+                    // Spielername zeichnen
+                    if (isLocalPlayer || isSelectedPlayer) {
+                        adminMapCtx.fillStyle = '#333';
+                        adminMapCtx.font = '10px Arial';
+                        adminMapCtx.textAlign = 'center';
+                        adminMapCtx.fillText(player.name, playerX, playerY - 8);
                     }
                 }
             }
 
-            // IMPROVED MOBILE CONTROLS
+            // Mobile Steuerung einrichten
             function setupMobileControls() {
                 const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 767;
                 const mobileControls = document.getElementById('mobile-controls');
@@ -2111,49 +2297,25 @@
                 console.log("Mobilgerät erkannt, aktiviere Touch-Steuerung");
                 mobileControls.style.display = 'block';
                 
-                // Control elements
+                // Joystick-Elemente
                 const joystickArea = document.getElementById('joystick-area');
                 const joystickThumb = document.getElementById('joystick-thumb');
                 const fireArea = document.getElementById('fire-area');
                 const fireButton = document.getElementById('fire-button');
-                const autoFireBtn = document.getElementById('auto-fire-btn');
                 
-                // Control variables
+                // Joystick-Variablen
                 let joystickActive = false;
                 let joystickStartPos = { x: 0, y: 0 };
                 let joystickCurrentPos = { x: 0, y: 0 };
                 let moveVector = { dx: 0, dy: 0 };
                 
+                // Feuer-Variablen
                 let firingActive = false;
                 let fireStartPos = { x: 0, y: 0 };
                 let aimAngle = 0;
                 let shootingInterval = null;
-                let autoFireActive = false;
                 
-                // Auto-fire toggle
-                autoFireBtn.addEventListener('click', function() {
-                    autoFireActive = !autoFireActive;
-                    autoFireBtn.classList.toggle('active', autoFireActive);
-                    
-                    if (autoFireActive) {
-                        // Start auto-firing
-                        if (!shootingInterval) {
-                            shootingInterval = setInterval(() => {
-                                if (socket && player) {
-                                    socket.emit("shoot");
-                                }
-                            }, 180); // Slightly slower than manual for fairness
-                        }
-                    } else {
-                        // Stop auto-firing
-                        if (shootingInterval) {
-                            clearInterval(shootingInterval);
-                            shootingInterval = null;
-                        }
-                    }
-                });
-                
-                // Movement joystick events
+                // Joystick-Events
                 joystickArea.addEventListener('touchstart', function(e) {
                     e.preventDefault();
                     joystickActive = true;
@@ -2183,37 +2345,38 @@
                     e.preventDefault();
                     joystickActive = false;
                     
-                    // Reset joystick position
-                    joystickThumb.style.left = '40px';
-                    joystickThumb.style.top = '40px';
+                    // Zurücksetzen der Position
+                    joystickThumb.style.left = '45px';
+                    joystickThumb.style.top = '45px';
                     
-                    // Stop movement
+                    // Bewegung stoppen
                     moveVector.dx = 0;
                     moveVector.dy = 0;
                 });
                 
-                // Aiming/firing events
+                // Feuer-Bereich-Events
                 fireArea.addEventListener('touchstart', function(e) {
                     e.preventDefault();
                     firingActive = true;
                     
                     const touch = e.touches[0];
-                    updateFirePosition(touch);
+                    const rect = fireArea.getBoundingClientRect();
+                    fireStartPos.x = rect.left + rect.width / 2;
+                    fireStartPos.y = rect.top + rect.height / 2;
                     
-                    // If not in auto-fire mode, start manual firing
-                    if (!autoFireActive) {
-                        // First shot immediately
-                        if (socket && player) {
+                    updateFireButtonPosition(touch);
+                    
+                    // Sofort ersten Schuss abfeuern
+                    if (socket && player) {
+                        socket.emit("shoot");
+                    }
+                    
+                    // Kontinuierliches Schießen starten
+                    shootingInterval = setInterval(() => {
+                        if (firingActive && socket && player) {
                             socket.emit("shoot");
                         }
-                        
-                        // Start continuous firing
-                        shootingInterval = setInterval(() => {
-                            if (firingActive && socket && player) {
-                                socket.emit("shoot");
-                            }
-                        }, 180);
-                    }
+                    }, 200); // Alle 200ms schießen
                 });
                 
                 fireArea.addEventListener('touchmove', function(e) {
@@ -2221,32 +2384,32 @@
                     if (!firingActive) return;
                     
                     const touch = e.touches[0];
-                    updateFirePosition(touch);
+                    updateFireButtonPosition(touch);
                 });
                 
                 fireArea.addEventListener('touchend', function(e) {
                     e.preventDefault();
                     firingActive = false;
                     
-                    // Reset fire button position
-                    fireButton.style.left = '40px';
-                    fireButton.style.top = '40px';
+                    // Feuerknopf zurücksetzen
+                    fireButton.style.left = '45px';
+                    fireButton.style.top = '45px';
                     
-                    // Stop manual firing if not in auto-fire mode
-                    if (!autoFireActive && shootingInterval) {
+                    // Schießen stoppen
+                    if (shootingInterval) {
                         clearInterval(shootingInterval);
                         shootingInterval = null;
                     }
                 });
                 
-                // Update movement at fixed intervals
+                // Bewegungsvektor regelmäßig senden
                 setInterval(() => {
                     if (player && socket && (moveVector.dx !== 0 || moveVector.dy !== 0)) {
                         socket.emit("move", moveVector);
                     }
-                }, 33); // ~30 times per second
+                }, 33); // ~30 mal pro Sekunde
                 
-                // Helper functions for mobile controls
+                // Hilfsfunktionen
                 function updateJoystickPosition() {
                     const deltaX = joystickCurrentPos.x - joystickStartPos.x;
                     const deltaY = joystickCurrentPos.y - joystickStartPos.y;
@@ -2256,7 +2419,6 @@
                     let thumbX, thumbY;
                     
                     if (distance > maxDistance) {
-                        // Limit to edge of joystick area
                         const angle = Math.atan2(deltaY, deltaX);
                         thumbX = Math.cos(angle) * maxDistance + joystickArea.clientWidth / 2 - joystickThumb.clientWidth / 2;
                         thumbY = Math.sin(angle) * maxDistance + joystickArea.clientHeight / 2 - joystickThumb.clientHeight / 2;
@@ -2265,86 +2427,47 @@
                         thumbY = deltaY + joystickArea.clientHeight / 2 - joystickThumb.clientHeight / 2;
                     }
                     
-                    // Update joystick thumb position
                     joystickThumb.style.left = thumbX + 'px';
                     joystickThumb.style.top = thumbY + 'px';
                     
-                    // Calculate movement vector (-1 to 1 for both axes)
+                    // Bewegungsvektor berechnen (-1 bis 1 für beide Achsen)
                     moveVector.dx = Math.min(Math.max(deltaX / maxDistance, -1), 1);
                     moveVector.dy = Math.min(Math.max(deltaY / maxDistance, -1), 1);
                 }
                 
-                function updateFirePosition(touch) {
+                function updateFireButtonPosition(touch) {
                     const rect = fireArea.getBoundingClientRect();
                     const centerX = rect.left + rect.width / 2;
                     const centerY = rect.top + rect.height / 2;
                     
                     const deltaX = touch.clientX - centerX;
                     const deltaY = touch.clientY - centerY;
-                    const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-                    const maxDistance = fireArea.clientWidth / 2 - fireButton.clientWidth / 2;
                     
-                    // Calculate aim angle
+                    // Winkel zum Server senden (für die Rotation der Kanone)
                     aimAngle = Math.atan2(deltaY, deltaX);
-                    
-                    // Send rotation to server
                     if (socket && player) {
                         socket.emit("rotate", aimAngle);
                     }
                     
-                    // Update fire button position (visual feedback)
-                    let buttonX, buttonY;
-                    
-                    if (distance > maxDistance) {
-                        // Limit to edge of fire area
-                        buttonX = Math.cos(aimAngle) * maxDistance + fireArea.clientWidth / 2 - fireButton.clientWidth / 2;
-                        buttonY = Math.sin(aimAngle) * maxDistance + fireArea.clientHeight / 2 - fireButton.clientHeight / 2;
-                    } else {
-                        buttonX = deltaX + fireArea.clientWidth / 2 - fireButton.clientWidth / 2;
-                        buttonY = deltaY + fireArea.clientHeight / 2 - fireButton.clientHeight / 2;
-                    }
-                    
-                    fireButton.style.left = buttonX + 'px';
-                    fireButton.style.top = buttonY + 'px';
+                    // Nur den Zielpunkt visualisieren, nicht den Button verschieben
+                    // für ein besseres Spielgefühl
                 }
-                // Events for death screen
+                
+                // Ereignisse für Tod-Bildschirm
+                socket.on('died', function() {
+                    document.body.classList.add('controls-hidden');
+                });
+                
+                // Ereignislistener für Continue-Button
                 document.getElementById('death-continue-btn').addEventListener('click', function() {
                     document.body.classList.remove('controls-hidden');
-                    location.reload();
                 });
                 
-                // Setup visibility changes
-                document.addEventListener('visibilitychange', function() {
-                    if (document.hidden) {
-                        // Page is hidden (app in background)
-                        if (shootingInterval) {
-                            clearInterval(shootingInterval);
-                            shootingInterval = null;
-                        }
-                        autoFireActive = false;
-                        autoFireBtn.classList.remove('active');
-                    }
-                });
-                
-                // Lock screen orientation to landscape if supported
-                if (screen.orientation && screen.orientation.lock) {
-                    try {
-                        screen.orientation.lock('landscape').catch(e => {
-                            console.log('Orientation lock not supported:', e);
-                        });
-                    } catch (e) {
-                        console.log('Orientation API not fully supported');
-                    }
-                }
-                
-                // Request fullscreen on first touch for better experience
-                document.addEventListener('touchstart', function requestFullScreen() {
+                // Vollbild anfordern für ein besseres Spielerlebnis auf Mobilgeräten
+                document.addEventListener('click', function requestFullScreen() {
                     const elem = document.documentElement;
-                    
                     if (elem.requestFullscreen) {
-                        elem.requestFullscreen().catch(e => {
-                            console.log('Fullscreen request denied:', e);
-                        });
+                        elem.requestFullscreen();
                     } else if (elem.mozRequestFullScreen) { /* Firefox */
                         elem.mozRequestFullScreen();
                     } else if (elem.webkitRequestFullscreen) { /* Chrome, Safari & Opera */
@@ -2352,9 +2475,7 @@
                     } else if (elem.msRequestFullscreen) { /* IE/Edge */
                         elem.msRequestFullscreen();
                     }
-                    
-                    // Remove this listener after first execution
-                    document.removeEventListener('touchstart', requestFullScreen);
+                    document.removeEventListener('click', requestFullScreen);
                 }, { once: true });
             }
 
@@ -2373,25 +2494,14 @@
                             score: player.score || 0
                         })
                     );
-                    
-                    // Clear any intervals
-                    if (shootingInterval) {
-                        clearInterval(shootingInterval);
-                    }
                 }
             });
-            
-            // Additional event for mobile devices to handle resize events better
-            window.addEventListener('orientationchange', () => {
-                setTimeout(() => {
-                    canvas.width = window.innerWidth;
-                    canvas.height = window.innerHeight;
-                    particleCanvas.width = window.innerWidth;
-                    particleCanvas.height = window.innerHeight;
-                    
-                    // Readjust camera zoom based on new orientation
-                    setCameraZoom();
-                }, 100); // Small delay to ensure dimensions are updated
+
+            // Mobil-Steuerung nach dem Starten des Spiels einrichten
+            document.addEventListener('DOMContentLoaded', function() {
+                // Das Spiel wird bereits durch startGame() gestartet
+                // Wir richten die Mobilsteuerung nach dem Laden der Seite ein
+                setupMobileControls();
             });
         </script>
     </body>
