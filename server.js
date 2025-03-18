@@ -552,13 +552,7 @@ io.on('connection', (socket) => {
                     // Punkte an Spieler vergeben
                     player.score += block.points * 10;
 
-                    // XP vergeben und Level prüfen
-                    const gainedXp = block.xp;
-                    player.xp += gainedXp;
-                    player.totalXp += gainedXp;
-
-                    // Prüfen, ob Level-Aufstieg
-                    checkLevelUp(player);
+                    checkLevelUp(player, gainedXp);
 
                     // Block an neuer Position respawnen
                     block.x = Math.random() * GAME_WIDTH;
@@ -690,10 +684,16 @@ io.on('connection', (socket) => {
 
 
 // Level-Up Funktion
-function checkLevelUp(player) {
+function checkLevelUp(player, gainedXp = 0) {
     // Falls XP-Multiplikator existiert, anwenden
-    if (player.xpMultiplier) {
+    if (player.xpMultiplier && gainedXp > 0) {
         gainedXp *= player.xpMultiplier;
+    }
+    
+    // XP zum Spieler hinzufügen
+    if (gainedXp > 0) {
+        player.xp += gainedXp;
+        player.totalXp += gainedXp;
     }
     
     if (player.xp >= player.xpToNextLevel) {
@@ -719,7 +719,7 @@ function checkLevelUp(player) {
 
         // Rekursiv prüfen, ob mehrere Level auf einmal aufgestiegen
         if (player.xp >= player.xpToNextLevel) {
-            checkLevelUp(player);
+            checkLevelUp(player, gainedXp);
         }
     }
 }
@@ -950,7 +950,7 @@ function checkPlayerBotCollisions() {
                     player.totalXp += xpGain;
 
                     // Levelaufstieg prüfen
-                    checkLevelUp(player);
+                    checkLevelUp(player, gainedXp);
 
                     // Spieler über XP-Gewinn informieren
                     io.to(playerId).emit('xpGained', {
@@ -1076,8 +1076,7 @@ function updateBullets() {
                     if (player) {
                         // XP vergeben und Level prüfen
                         const gainedXp = block.xp;
-                        player.xp += gainedXp;
-                        player.totalXp += gainedXp;
+
 
                         // Benachrichtigung über XP-Gewinn an Schützen senden
                         io.to(bullet.ownerId).emit('xpGained', {
@@ -1086,7 +1085,7 @@ function updateBullets() {
                         });
 
                         // Prüfen, ob Level-Aufstieg
-                        checkLevelUp(player);
+                        checkLevelUp(player, gainedXp);
                     }
 
                     // Block an zufälliger Position respawnen
