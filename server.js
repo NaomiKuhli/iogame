@@ -265,6 +265,148 @@ io.on('connection', (socket) => {
         updateLeaderboard();
     });
 
+    // Verbesserte Admin-Befehle mit Token-Authentifizierung
+    socket.on('admin_toggle_god_mode', (data) => {
+        // Prüfen, ob Token und Admin-Status vorhanden sind
+        if (!data || !data.token) {
+            console.log("God-Mode-Anfrage ohne Token abgelehnt");
+            return;
+        }
+        
+        // Admin-Authentifizierung durchführen
+        verifyAdminToken(data.token, (isAdmin) => {
+            if (!isAdmin) {
+                console.log(`God-Mode-Anfrage mit ungültigem Admin-Token abgelehnt: ${data.token}`);
+                return;
+            }
+
+            // Spieler aus Socket.ID ermitteln
+            const player = players[socket.id];
+            if (!player) return;
+
+            // God-Mode umschalten
+            player.godMode = !!data.enabled;
+            console.log(`God-Mode ${player.godMode ? 'aktiviert' : 'deaktiviert'} für Spieler ${player.name} (Admin-Aktion)`);
+        });
+    });
+
+    socket.on('admin_give_levels', (data) => {
+        // Admin-Rechte prüfen
+        if (!data || !data.token) return;
+        
+        verifyAdminToken(data.token, (isAdmin) => {
+            if (!isAdmin) return;
+            
+            const playerId = data.playerId;
+            const levels = data.levels;
+
+            if (!playerId || !players[playerId]) return;
+
+            const targetPlayer = players[playerId];
+
+            // Level hinzufügen
+            for (let i = 0; i < levels; i++) {
+                targetPlayer.level += 1;
+                targetPlayer.availableUpgrades += 1;
+
+                // Nächstes Level braucht mehr XP (20% mehr pro Level)
+                targetPlayer.xpToNextLevel = Math.floor(BASE_XP_FOR_LEVEL * Math.pow(1.2, targetPlayer.level - 1));
+            }
+
+            // Spieler über Level-Up informieren
+            io.to(playerId).emit('levelUp', {
+                level: targetPlayer.level,
+                xpToNextLevel: targetPlayer.xpToNextLevel,
+                availableUpgrades: targetPlayer.availableUpgrades
+            });
+
+            // Bestenliste aktualisieren
+            updateLeaderboard();
+        });
+    });
+
+    socket.on('admin_kill_player', (data) => {
+        // Admin-Rechte prüfen
+        if (!data || !data.token) return;
+        
+        verifyAdminToken(data.token, (isAdmin) => {
+            if (!isAdmin) return;
+            
+            const playerId = data.playerId;
+
+            if (!playerId || !players[playerId]) return;
+
+            const targetPlayer = players[playerId];
+
+            // Spieler über Tod benachrichtigen
+            io.to(playerId).emit('died', {
+                score: targetPlayer.score,
+                level: targetPlayer.level,
+                killerName: "Admin",
+                killerId: null
+            });
+
+            // Spieler entfernen
+            delete players[playerId];
+            io.emit('playerLeft', playerId);
+
+            // Bestenliste aktualisieren
+            updateLeaderboard();
+        });
+    });
+
+    socket.on('admin_spawn_bot', (data) => {
+        // Admin-Rechte prüfen
+        if (!data || !data.token) return;
+        
+        verifyAdminToken(data.token, (isAdmin) => {
+            if (!isAdmin) return;
+            
+            // Bot-System aufrufen um einen Bot zu spawnen
+            if (typeof botManager === 'object' && botManager.createBot) {
+                botManager.createBot();
+            }
+        });
+    });
+
+    // Funktion zur Überprüfung eines Admin-Tokens
+    function verifyAdminToken(token, callback) {
+        // Hier müsstest du einen HTTP-Request an deinen Auth-Server senden
+        // Für dieses Beispiel verwenden wir eine vereinfachte Version
+        const https = require('https');
+        
+        const options = {
+            hostname: 'nm-web.de',
+            path: `/check_admin_status.php?token=${encodeURIComponent(token)}`,
+            method: 'GET'
+        };
+
+        const req = https.request(options, (res) => {
+            let data = '';
+            
+            res.on('data', (chunk) => {
+                data += chunk;
+            });
+            
+            res.on('end', () => {
+                try {
+                    const response = JSON.parse(data);
+                    callback(response.success && response.is_admin);
+                } catch (e) {
+                    console.error("Fehler beim Parsen der Admin-Überprüfungsantwort:", e);
+                    callback(false);
+                }
+            });
+        });
+        
+        req.on('error', (e) => {
+            console.error(`Problem mit der Admin-Verifizierung: ${e.message}`);
+            callback(false);
+        });
+        
+        req.end();
+    }
+
     // NEU: God-Mode umschalten
     socket.on('toggle_god_mode', (enabled) => {
         const player = players[socket.id];
@@ -476,66 +618,6 @@ io.on('connection', (socket) => {
         }
     });
 
-    // Admin-Befehle verarbeiten
-    socket.on('admin_give_levels', (data) => {
-        const playerId = data.playerId;
-        const levels = data.levels;
-
-        if (!playerId || !players[playerId]) return;
-
-        const targetPlayer = players[playerId];
-
-        // Level hinzufügen
-        for (let i = 0; i < levels; i++) {
-            targetPlayer.level += 1;
-            targetPlayer.availableUpgrades += 1;
-
-            // Nächstes Level braucht mehr XP (20% mehr pro Level)
-            targetPlayer.xpToNextLevel = Math.floor(BASE_XP_FOR_LEVEL * Math.pow(1.2, targetPlayer.level - 1));
-        }
-
-        // Spieler über Level-Up informieren
-        io.to(playerId).emit('levelUp', {
-            level: targetPlayer.level,
-            xpToNextLevel: targetPlayer.xpToNextLevel,
-            availableUpgrades: targetPlayer.availableUpgrades
-        });
-
-        // Bestenliste aktualisieren
-        updateLeaderboard();
-    });
-
-    socket.on('admin_kill_player', (data) => {
-        const playerId = data.playerId;
-
-        if (!playerId || !players[playerId]) return;
-
-        const targetPlayer = players[playerId];
-
-        // Spieler über Tod benachrichtigen
-        io.to(playerId).emit('died', {
-            score: targetPlayer.score,
-            level: targetPlayer.level,
-            killerName: "Admin",
-            killerId: null
-        });
-
-        // Spieler entfernen
-        delete players[playerId];
-        io.emit('playerLeft', playerId);
-
-        // Bestenliste aktualisieren
-        updateLeaderboard();
-    });
-
-    socket.on('admin_spawn_bot', () => {
-        // Bot-System aufrufen um einen Bot zu spawnen
-        // Überprüfen, ob botManager definiert ist
-        if (typeof botManager === 'object' && botManager.createBot) {
-            botManager.createBot();
-        }
-    });
-
     // Spielerinaktivität verarbeiten
     socket.on('inactive', () => {
         inactivePlayers.add(socket.id);
@@ -590,8 +672,6 @@ io.on('connection', (socket) => {
 
         // Bestenliste aktualisieren
         updateLeaderboard();
-
-        
     });
 });
 
