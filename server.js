@@ -173,55 +173,45 @@ io.on('connection', (socket) => {
         const query = socket.handshake.query;
         const playerName = data.name || query.name || 'Unbenannt';
         
-        // Upgrade-Informationen und Token extrahieren
+        // Upgrade-Informationen extrahieren
         let upgradeCode = null;
-        let userToken = null;
-        
-        if (data && data.token) {
-            userToken = data.token;
-            console.log(`Spieler mit Token beigetreten: ${playerName}`);
-        }
-        
         if (data && data.upgrade) {
             upgradeCode = data.upgrade;
             console.log(`Spieler ${playerName} möchte Upgrade verwenden: ${upgradeCode}`);
         }
     
-        // Voreinstellungen für Spieler festlegen
-        let startLevel = 1;
-        let startUpgrades = 0;
-        let hasGodMode = false;
-        let hasDoubleXP = false;
-        let hasDoubleCannon = false;
+        // Standardwerte für Upgrade-Eigenschaften festlegen
+        const playerSettings = {
+            doubleCannon: false,
+            xpMultiplier: 1,
+            godMode: false,
+            level: 1,
+            availableUpgrades: 0
+        };
         
-        // Upgrade-Effekte vorbereiten, wenn vorhanden
+        // Upgrade-Einstellungen vorverarbeiten
         if (upgradeCode) {
             console.log(`Verarbeite Upgrade: ${upgradeCode}`);
-            
             switch(upgradeCode) {
                 case 'start_level_5':
-                    startLevel = 5;
-                    startUpgrades = 4;
-                    console.log(`Level 5 Upgrade vorbereitet für ${playerName}`);
+                    playerSettings.level = 5;
+                    playerSettings.availableUpgrades = 4;
                     break;
                 case 'god_mode_30':
-                    hasGodMode = true;
-                    console.log(`God Mode Upgrade vorbereitet für ${playerName}`);
+                    playerSettings.godMode = true;
                     break;
                 case 'double_xp':
-                    hasDoubleXP = true;
-                    console.log(`Doppelte XP Upgrade vorbereitet für ${playerName}`);
+                    playerSettings.xpMultiplier = 2;
                     break;
                 case 'double_cannon':
-                    hasDoubleCannon = true;
-                    console.log(`Doppelkanone Upgrade vorbereitet für ${playerName}`);
+                    playerSettings.doubleCannon = true;
                     break;
                 default:
                     console.log(`Unbekanntes Upgrade: ${upgradeCode}`);
             }
         }
     
-        // Neuen Spieler erstellen mit vorbereiteten Werten
+        // Neuen Spieler erstellen - jetzt mit den Upgrade-Eigenschaften
         const player = {
             id: socket.id,
             name: playerName,
@@ -231,9 +221,9 @@ io.on('connection', (socket) => {
             health: BASE_STATS.maxHealth,
             maxHealth: BASE_STATS.maxHealth,
             score: 0,
-            level: startLevel,
+            level: playerSettings.level,
             xp: 0,
-            xpToNextLevel: BASE_XP_FOR_LEVEL * Math.pow(1.2, startLevel - 1),
+            xpToNextLevel: BASE_XP_FOR_LEVEL * Math.pow(1.2, playerSettings.level - 1),
             totalXp: 0,
             upgrades: {
                 healthRegen: { level: 1, max: 10 },
@@ -247,23 +237,21 @@ io.on('connection', (socket) => {
             },
             totalUpgrades: 0,
             maxTotalUpgrades: 45,
-            availableUpgrades: startUpgrades,
+            availableUpgrades: playerSettings.availableUpgrades,
             isLeader: false,
             lastShootTime: 0,
             lastActiveTime: Date.now(),
-            godMode: hasGodMode,
-            doubleCannon: hasDoubleCannon,
-            xpMultiplier: hasDoubleXP ? 2 : 1,
-            // Optional: Token für spätere Statistik-Updates speichern
-            token: userToken,
-            joinTime: Date.now()
+            // Die vorverarbeiteten Upgrade-Eigenschaften
+            godMode: playerSettings.godMode,
+            doubleCannon: playerSettings.doubleCannon,
+            xpMultiplier: playerSettings.xpMultiplier
         };
     
         // Spieler zum Spiel hinzufügen
         players[socket.id] = player;
     
-        // God-Mode-Timer starten, wenn aktiviert
-        if (hasGodMode) {
+        // Nachträgliche Verarbeitung des God-Mode-Timers
+        if (playerSettings.godMode) {
             console.log(`God Mode Timer für ${playerName} gestartet (30s)`);
             setTimeout(() => {
                 if (players[socket.id]) {
@@ -286,6 +274,157 @@ io.on('connection', (socket) => {
     
         // Bestenliste aktualisieren
         updateLeaderboard();
+    });
+
+    // Verbesserte Admin-Befehle mit Token-Authentifizierung
+    socket.on('admin_toggle_god_mode', (data) => {
+        // Prüfen, ob Token und Admin-Status vorhanden sind
+        if (!data || !data.token) {
+            console.log("God-Mode-Anfrage ohne Token abgelehnt");
+            return;
+        }
+        
+        // Admin-Authentifizierung durchführen
+        verifyAdminToken(data.token, (isAdmin) => {
+            if (!isAdmin) {
+                console.log(`God-Mode-Anfrage mit ungültigem Admin-Token abgelehnt: ${data.token}`);
+                return;
+            }
+
+            // Spieler aus Socket.ID ermitteln
+            const player = players[socket.id];
+            if (!player) return;
+
+            // God-Mode umschalten
+            player.godMode = !!data.enabled;
+            console.log(`God-Mode ${player.godMode ? 'aktiviert' : 'deaktiviert'} für Spieler ${player.name} (Admin-Aktion)`);
+        });
+    });
+
+    socket.on('admin_give_levels', (data) => {
+        // Admin-Rechte prüfen
+        if (!data || !data.token) return;
+        
+        verifyAdminToken(data.token, (isAdmin) => {
+            if (!isAdmin) return;
+            
+            const playerId = data.playerId;
+            const levels = data.levels;
+
+            if (!playerId || !players[playerId]) return;
+
+            const targetPlayer = players[playerId];
+
+            // Level hinzufügen
+            for (let i = 0; i < levels; i++) {
+                targetPlayer.level += 1;
+                targetPlayer.availableUpgrades += 1;
+
+                // Nächstes Level braucht mehr XP (20% mehr pro Level)
+                targetPlayer.xpToNextLevel = Math.floor(BASE_XP_FOR_LEVEL * Math.pow(1.2, targetPlayer.level - 1));
+            }
+
+            // Spieler über Level-Up informieren
+            io.to(playerId).emit('levelUp', {
+                level: targetPlayer.level,
+                xpToNextLevel: targetPlayer.xpToNextLevel,
+                availableUpgrades: targetPlayer.availableUpgrades
+            });
+
+            // Bestenliste aktualisieren
+            updateLeaderboard();
+        });
+    });
+
+    socket.on('admin_kill_player', (data) => {
+        // Admin-Rechte prüfen
+        if (!data || !data.token) return;
+        
+        verifyAdminToken(data.token, (isAdmin) => {
+            if (!isAdmin) return;
+            
+            const playerId = data.playerId;
+
+            if (!playerId || !players[playerId]) return;
+
+            const targetPlayer = players[playerId];
+
+            // Spieler über Tod benachrichtigen
+            io.to(playerId).emit('died', {
+                score: targetPlayer.score,
+                level: targetPlayer.level,
+                killerName: "Admin",
+                killerId: null
+            });
+
+            // Spieler entfernen
+            delete players[playerId];
+            io.emit('playerLeft', playerId);
+
+            // Bestenliste aktualisieren
+            updateLeaderboard();
+        });
+    });
+
+    socket.on('admin_spawn_bot', (data) => {
+        // Admin-Rechte prüfen
+        if (!data || !data.token) return;
+        
+        verifyAdminToken(data.token, (isAdmin) => {
+            if (!isAdmin) return;
+            
+            // Bot-System aufrufen um einen Bot zu spawnen
+            if (typeof botManager === 'object' && botManager.createBot) {
+                botManager.createBot();
+            }
+        });
+    });
+
+    // Funktion zur Überprüfung eines Admin-Tokens
+    function verifyAdminToken(token, callback) {
+        // Hier müsstest du einen HTTP-Request an deinen Auth-Server senden
+        // Für dieses Beispiel verwenden wir eine vereinfachte Version
+        const https = require('https');
+        
+        const options = {
+            hostname: 'nm-web.de',
+            path: `/check_admin_status.php?token=${encodeURIComponent(token)}`,
+            method: 'GET'
+        };
+
+        const req = https.request(options, (res) => {
+            let data = '';
+            
+            res.on('data', (chunk) => {
+                data += chunk;
+            });
+            
+            res.on('end', () => {
+                try {
+                    const response = JSON.parse(data);
+                    callback(response.success && response.is_admin);
+                } catch (e) {
+                    console.error("Fehler beim Parsen der Admin-Überprüfungsantwort:", e);
+                    callback(false);
+                }
+            });
+        });
+        
+        req.on('error', (e) => {
+            console.error(`Problem mit der Admin-Verifizierung: ${e.message}`);
+            callback(false);
+        });
+        
+        req.end();
+    }
+
+    // NEU: God-Mode umschalten
+    socket.on('toggle_god_mode', (enabled) => {
+        const player = players[socket.id];
+        if (player) {
+            player.godMode = enabled;
+            console.log(`God-Mode ${enabled ? 'aktiviert' : 'deaktiviert'} für Spieler ${player.name}`);
+        }
     });
 
     // Spielerbewegung verarbeiten
@@ -415,7 +554,11 @@ io.on('connection', (socket) => {
 
                     // XP vergeben und Level prüfen
                     const gainedXp = block.xp;
-                    checkLevelUp(player, gainedXp);
+                    player.xp += gainedXp;
+                    player.totalXp += gainedXp;
+
+                    // Prüfen, ob Level-Aufstieg
+                    checkLevelUp(player);
 
                     // Block an neuer Position respawnen
                     block.x = Math.random() * GAME_WIDTH;
@@ -543,17 +686,14 @@ io.on('connection', (socket) => {
     });
 });
 
-// ÜBERARBEITETE CHECKLEVELUP-FUNKTION
-function checkLevelUp(player, gainedXp = 0) {
+//Login,Player System :3
+
+
+// Level-Up Funktion
+function checkLevelUp(player) {
     // Falls XP-Multiplikator existiert, anwenden
-    if (player.xpMultiplier && gainedXp > 0) {
+    if (player.xpMultiplier) {
         gainedXp *= player.xpMultiplier;
-    }
-    
-    // XP zum Spieler hinzufügen
-    if (gainedXp > 0) {
-        player.xp += gainedXp;
-        player.totalXp += gainedXp;
     }
     
     if (player.xp >= player.xpToNextLevel) {
@@ -579,7 +719,7 @@ function checkLevelUp(player, gainedXp = 0) {
 
         // Rekursiv prüfen, ob mehrere Level auf einmal aufgestiegen
         if (player.xp >= player.xpToNextLevel) {
-            checkLevelUp(player, 0); // Kein zusätzliches XP bei rekursivem Aufruf
+            checkLevelUp(player);
         }
     }
 }
@@ -735,6 +875,117 @@ function updateBlocks() {
     }
 }
 
+// NEU: Kollisionen zwischen Spielern und Bots prüfen (für Body Damage)
+function checkPlayerBotCollisions() {
+    for (const playerId in players) {
+        const player = players[playerId];
+        if (player.isBot) continue; // Überspringe Bot-gegen-Bot-Kollisionen
+
+        // Ignorieren, wenn Spieler im God-Mode ist
+        if (player.godMode) continue;
+
+        // Für jede Bot
+        for (const botId in players) {
+            const bot = players[botId];
+            if (!bot.isBot) continue; // Nur Bots
+
+            const dx = player.x - bot.x;
+            const dy = player.y - bot.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            const minDistance = PLAYER_BASE_SIZE * 2; // Beide Spieler haben Radius
+
+            if (distance < minDistance) {
+                // Kollision! Beide erhalten Schaden basierend auf Body Damage
+
+                // Bot erhält Schaden basierend auf Spieler-Körperschaden
+                const playerBodyDamage = BASE_STATS.bodyDamage * 
+                    (1 + (player.upgrades.bodyDamage.level - 1) * 
+                    UPGRADE_EFFECTS.bodyDamage.upgradeMultiplier);
+
+                // Spieler erhält Schaden basierend auf Bot-Körperschaden
+                const botBodyDamage = BASE_STATS.bodyDamage * 
+                    (1 + (bot.upgrades.bodyDamage.level - 1) * 
+                    UPGRADE_EFFECTS.bodyDamage.upgradeMultiplier);
+
+                // Schaden anwenden
+                bot.health = Math.max(0, bot.health - playerBodyDamage * 0.5);
+                player.health = Math.max(0, player.health - botBodyDamage * 0.5);
+
+                // Kollisionseffekt an alle senden
+                io.emit('playerDamaged', {
+                    id: botId,
+                    health: bot.health
+                });
+
+                io.emit('playerDamaged', {
+                    id: playerId,
+                    health: player.health
+                });
+
+                // Wegdrücken
+                const angle = Math.atan2(dy, dx);
+                const pushX = Math.cos(angle) * (minDistance - distance + 5) * 0.5;
+                const pushY = Math.sin(angle) * (minDistance - distance + 5) * 0.5;
+
+                // Bot wegbewegen
+                bot.x -= pushX;
+                bot.y -= pushY;
+
+                // Spieler wegbewegen
+                player.x += pushX;
+                player.y += pushY;
+
+                // Spielfeldgrenzen einhalten
+                bot.x = Math.max(0, Math.min(GAME_WIDTH, bot.x));
+                bot.y = Math.max(0, Math.min(GAME_HEIGHT, bot.y));
+                player.x = Math.max(0, Math.min(GAME_WIDTH, player.x));
+                player.y = Math.max(0, Math.min(GAME_HEIGHT, player.y));
+
+                // Bot-Tod prüfen
+                if (bot.health <= 0) {
+                    // XP und Punkte an Spieler
+                    player.score += 100;
+                    const xpGain = Math.floor(bot.totalXp * 0.33);
+                    player.xp += xpGain;
+                    player.totalXp += xpGain;
+
+                    // Levelaufstieg prüfen
+                    checkLevelUp(player);
+
+                    // Spieler über XP-Gewinn informieren
+                    io.to(playerId).emit('xpGained', {
+                        amount: xpGain,
+                        fromKill: true,
+                        victimName: bot.name
+                    });
+
+                    // Bot entfernen
+                    if (typeof botManager.removeBot === 'function') {
+                        botManager.removeBot(botId);
+                    } else {
+                        delete players[botId];
+                        io.emit('playerLeft', botId);
+                    }
+                }
+
+                // Spieler-Tod prüfen
+                if (player.health <= 0) {
+                    io.to(playerId).emit('died', {
+                        score: player.score,
+                        level: player.level,
+                        killerName: bot.name,
+                        killerId: botId
+                    });
+
+                    // Spieler entfernen
+                    delete players[playerId];
+                    io.emit('playerLeft', playerId);
+                }
+            }
+        }
+    }
+}
+
 // VERBESSERT: Geschosspositionen aktualisieren und Kollisionen prüfen
 function updateBullets() {
     const now = Date.now();
@@ -823,18 +1074,19 @@ function updateBullets() {
                     // Punkte an Schützen vergeben
                     const player = players[bullet.ownerId];
                     if (player) {
-                        // Spieler punktet
-                        player.score += block.points * 10;
-                        
                         // XP vergeben und Level prüfen
                         const gainedXp = block.xp;
-                        checkLevelUp(player, gainedXp);
+                        player.xp += gainedXp;
+                        player.totalXp += gainedXp;
 
                         // Benachrichtigung über XP-Gewinn an Schützen senden
                         io.to(bullet.ownerId).emit('xpGained', {
                             amount: gainedXp,
                             fromKill: false
                         });
+
+                        // Prüfen, ob Level-Aufstieg
+                        checkLevelUp(player);
                     }
 
                     // Block an zufälliger Position respawnen
@@ -886,7 +1138,11 @@ function updateBullets() {
 
                         // 33% der XP des getöteten Spielers an den Shooter vergeben
                         const xpGain = Math.floor(player.totalXp * 0.33);
-                        checkLevelUp(shooter, xpGain);
+                        shooter.xp += xpGain;
+                        shooter.totalXp += xpGain;
+
+                        // Level-Aufstieg prüfen
+                        checkLevelUp(shooter);
 
                         // Killer über erhaltene XP informieren
                         io.to(bullet.ownerId).emit('xpGained', {
@@ -919,6 +1175,25 @@ function updateBullets() {
                 }
             }
         }
+    }
+}
+
+// NEUE FUNKTION: Verwaiste Kugeln entfernen
+function cleanupOrphanedBullets() {
+    const validPlayerIds = new Set(Object.keys(players));
+    let removedCount = 0;
+
+    for (let i = bullets.length - 1; i >= 0; i--) {
+        const bullet = bullets[i];
+        if (!validPlayerIds.has(bullet.ownerId)) {
+            // Besitzer existiert nicht mehr, Kugel entfernen
+            bullets.splice(i, 1);
+            removedCount++;
+        }
+    }
+
+    if (removedCount > 0) {
+        console.log(`${removedCount} verwaiste Kugeln entfernt`);
     }
 }
 
@@ -971,6 +1246,12 @@ const botManager = botSystem(io, players, bullets, blocks, BASE_STATS, PLAYER_BA
 setInterval(() => {
     // Geschosse aktualisieren
     updateBullets();
+
+    // NEU: Verwaiste Kugeln aufräumen
+    cleanupOrphanedBullets();
+
+    // NEU: Spieler-Bot-Kollisionen prüfen
+    checkPlayerBotCollisions();
 
     // Spieler aktualisieren
     updatePlayers();
