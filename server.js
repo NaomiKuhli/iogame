@@ -1139,9 +1139,10 @@ function updateBullets() {
                         const xpGain = Math.floor(player.totalXp * 0.33);
                         shooter.xp += xpGain;
                         shooter.totalXp += xpGain;
+                        const gainedXp = shooter.totalXp;
 
                         // Level-Aufstieg prüfen
-                        checkLevelUp(shooter);
+                        checkLevelUp(shooter, gainedXp);
 
                         // Killer über erhaltene XP informieren
                         io.to(bullet.ownerId).emit('xpGained', {
