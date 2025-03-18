@@ -626,16 +626,7 @@
             </div>
         </div>
 
-        <!-- Admin-Menü hinzufügen -->
-        <div id="admin-password-dialog" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0, 0, 0, 0.8); padding: 20px; border-radius: 10px; z-index: 1000; color: white; text-align: center; box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);">
-            <h3>Admin-Zugriff</h3>
-            <input type="password" id="admin-password" placeholder="Passwort eingeben" style="margin: 10px 0; padding: 8px; width: 200px; border-radius: 4px; border: none;">
-            <div>
-                <button id="admin-login-btn" style="background: #3498db; color: white; border: none; padding: 8px 15px; margin-right: 10px; border-radius: 4px; cursor: pointer;">Anmelden</button>
-                <button id="admin-cancel-btn" style="background: #e74c3c; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer;">Abbrechen</button>
-            </div>
-        </div>
-
+        <!-- Admin Panel (überarbeitet, kein Passwort-Dialog mehr) -->
         <div id="admin-panel" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0, 0, 0, 0.85); padding: 20px; border-radius: 10px; z-index: 1000; color: white; width: 600px; height: 400px; box-shadow: 0 0 30px rgba(0, 0, 0, 0.7);">
             <h2 style="text-align: center; margin-top: 0;">Admin Panel</h2>
 
@@ -798,6 +789,15 @@
             let gameStartTime = Date.now();
             let killerViewActive = false;
             let killerViewData = null;
+
+            // Admin-Status und Funktionen
+            let isAdmin = false; // Wird vom Server basierend auf Datenbank gesetzt
+
+            // Die ADMIN_CONFIG Objekt ohne Passwort
+            const ADMIN_CONFIG = {
+                GOD_MODE: false,
+                SELECTED_PLAYER_ID: null
+            };
 
             // Upgrade-Menü-Elemente
             const upgradeMenu = document.getElementById("upgrade-menu");
@@ -1159,6 +1159,26 @@
                 .catch(error => console.error('Fehler beim Aktualisieren des Missionsfortschritts:', error));
             }
 
+            // Funktion zur Admin-Status-Prüfung
+            function checkAdminStatus(token, callback) {
+                fetch('check_admin_status.php?token=' + encodeURIComponent(token))
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            isAdmin = data.is_admin;
+                            callback(isAdmin);
+                        } else {
+                            isAdmin = false;
+                            callback(false);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Admin-Status-Prüfung fehlgeschlagen:', error);
+                        isAdmin = false;
+                        callback(false);
+                    });
+            }
+
             // Spiel direkt starten
             startGame();
 
@@ -1189,7 +1209,10 @@
                     // NEU: Wenn God-Mode schon aktiviert war, sofort an Server senden
                     if (ADMIN_CONFIG && ADMIN_CONFIG.GOD_MODE === true) {
                         console.log("God-Mode beim Start aktiviert, sende an Server");
-                        socket.emit('toggle_god_mode', true);
+                        socket.emit('admin_toggle_god_mode', {
+                            token: playerToken,
+                            enabled: true
+                        });
                     }
 
                     // UI initialisieren
@@ -1472,6 +1495,126 @@
                     }
                 }, 33);
             }
+
+            // Event-Listener für Admin-Menü (nur noch UI-Anzeige, keine Autorisierung)
+            window.addEventListener('keydown', (e) => {
+                if (e.key === 'u') {
+                    // Nur das Admin-Dialog anzeigen, wenn der Benutzer angemeldet ist
+                    if (playerToken) {
+                        // Admin-Status vom Server prüfen
+                        checkAdminStatus(playerToken, (isUserAdmin) => {
+                            if (isUserAdmin) {
+                                document.getElementById('admin-panel').style.display = 'block';
+                                updateAdminPlayersUI();
+                                initAdminMap();
+                                adminMapInterval = setInterval(updateAdminMap, 100);
+                            } else {
+                                createNotification('Kein Admin-Zugriff', 3000);
+                            }
+                        });
+                    } else {
+                        createNotification('Du musst angemeldet sein für Admin-Zugriff', 3000);
+                    }
+                }
+            });
+
+            // Admin Panel schließen
+            document.getElementById('admin-close-btn').addEventListener('click', closeAdminPanel);
+
+            // Admin-Aktionen über neue sichere Endpunkte senden
+            // God-Mode-Aktivierung
+            document.getElementById('admin-god-mode-btn').addEventListener('click', () => {
+                if (!isAdmin) {
+                    createNotification('Kein Admin-Zugriff', 3000);
+                    return;
+                }
+
+                ADMIN_CONFIG.GOD_MODE = !ADMIN_CONFIG.GOD_MODE;
+                const button = document.getElementById('admin-god-mode-btn');
+                button.textContent = `God-Mode: ${ADMIN_CONFIG.GOD_MODE ? 'AN' : 'AUS'}`;
+                button.style.background = ADMIN_CONFIG.GOD_MODE ? '#27ae60' : '#f39c12';
+
+                // Mit Token senden, um Autorisierung auf Server-Seite zu prüfen
+                if (socket && player && playerToken) {
+                    try {
+                        console.log("Sende God-Mode-Status an Server:", ADMIN_CONFIG.GOD_MODE);
+                        socket.emit('admin_toggle_god_mode', {
+                            token: playerToken,
+                            enabled: ADMIN_CONFIG.GOD_MODE
+                        });
+                    } catch (e) {
+                        console.error("Fehler beim Senden des God-Mode-Status:", e);
+                    }
+                }
+
+                createNotification(`God-Mode ${ADMIN_CONFIG.GOD_MODE ? 'aktiviert' : 'deaktiviert'}`);
+            });
+
+            // Bot-Spawn-Button
+            document.getElementById('admin-spawn-bot-btn').addEventListener('click', () => {
+                if (!isAdmin) {
+                    createNotification('Kein Admin-Zugriff', 3000);
+                    return;
+                }
+
+                // Bot-Spawn-Befehl an Server senden
+                socket.emit('admin_spawn_bot', { token: playerToken });
+                createNotification('Bot spawnen angefordert');
+            });
+
+            // Level-Geben-Button
+            document.getElementById('admin-give-level-btn').addEventListener('click', () => {
+                if (!isAdmin) {
+                    createNotification('Kein Admin-Zugriff', 3000);
+                    return;
+                }
+
+                if (!ADMIN_CONFIG.SELECTED_PLAYER_ID) {
+                    createNotification('Bitte wähle zuerst einen Spieler aus', 2000);
+                    return;
+                }
+
+                const levels = parseInt(document.getElementById('admin-level-input').value, 10);
+                if (isNaN(levels) || levels < 1) {
+                    createNotification('Bitte gebe eine gültige Level-Anzahl ein', 2000);
+                    return;
+                }
+
+                // Level-Befehl an Server senden
+                socket.emit('admin_give_levels', {
+                    token: playerToken,
+                    playerId: ADMIN_CONFIG.SELECTED_PLAYER_ID,
+                    levels: levels
+                });
+
+                createNotification(`${levels} Level an ${players[ADMIN_CONFIG.SELECTED_PLAYER_ID]?.name || 'Spieler'} gegeben`);
+            });
+
+            // Spieler-Töten-Button
+            document.getElementById('admin-kill-player-btn').addEventListener('click', () => {
+                if (!isAdmin) {
+                    createNotification('Kein Admin-Zugriff', 3000);
+                    return;
+                }
+
+                if (!ADMIN_CONFIG.SELECTED_PLAYER_ID) {
+                    createNotification('Bitte wähle zuerst einen Spieler aus', 2000);
+                    return;
+                }
+
+                if (ADMIN_CONFIG.SELECTED_PLAYER_ID === socket.id) {
+                    createNotification('Du kannst dich nicht selbst töten', 2000);
+                    return;
+                }
+
+                // Kill-Befehl an Server senden
+                socket.emit('admin_kill_player', {
+                    token: playerToken,
+                    playerId: ADMIN_CONFIG.SELECTED_PLAYER_ID
+                });
+
+                createNotification(`Spieler ${players[ADMIN_CONFIG.SELECTED_PLAYER_ID]?.name || 'unbekannt'} wurde eliminiert`);
+            });
 
             // VERBESSERT: Spielschleife mit Unterstützung für Killer-View
             function gameLoop() {
@@ -1992,127 +2135,9 @@
                 }
             }
 
-            // Admin-Konfiguration
-            const ADMIN_CONFIG = {
-                PASSWORD: 'NomNom123',
-                GOD_MODE: false,
-                SELECTED_PLAYER_ID: null
-            };
-
             // Admin-Map-Variablen
             let adminMapCtx = null;
             let adminMapInterval = null;
-
-            // Event-Listener für Admin-Menü
-            window.addEventListener('keydown', (e) => {
-                if (e.key === 'u') {
-                    // Admin-Passwort-Dialog anzeigen
-                    document.getElementById('admin-password-dialog').style.display = 'block';
-                    document.getElementById('admin-password').focus();
-                    document.getElementById('admin-password').value = '';
-                }
-            });
-
-            // Admin-Password-Dialog Setup
-            document.getElementById('admin-login-btn').addEventListener('click', () => {
-                const password = document.getElementById('admin-password').value;
-                if (password === ADMIN_CONFIG.PASSWORD) {
-                    document.getElementById('admin-password-dialog').style.display = 'none';
-                    openAdminPanel();
-                } else {
-                    alert('Falsches Passwort!');
-                }
-            });
-
-            document.getElementById('admin-cancel-btn').addEventListener('click', () => {
-                document.getElementById('admin-password-dialog').style.display = 'none';
-            });
-
-            document.getElementById('admin-password').addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') {
-                    document.getElementById('admin-login-btn').click();
-                } else if (e.key === 'Escape') {
-                    document.getElementById('admin-cancel-btn').click();
-                }
-            });
-
-            // Admin-Panel-Schließen-Button
-            document.getElementById('admin-close-btn').addEventListener('click', () => {
-                closeAdminPanel();
-            });
-
-            // God-Mode-Button
-            document.getElementById('admin-god-mode-btn').addEventListener('click', () => {
-                ADMIN_CONFIG.GOD_MODE = !ADMIN_CONFIG.GOD_MODE;
-                const button = document.getElementById('admin-god-mode-btn');
-                button.textContent = `God-Mode: ${ADMIN_CONFIG.GOD_MODE ? 'AN' : 'AUS'}`;
-                button.style.background = ADMIN_CONFIG.GOD_MODE ? '#27ae60' : '#f39c12';
-
-                // NEU: Sofortiges Senden des God-Mode-Status an Server
-                // Mit Fehlerbehandlung falls socket noch nicht bereit
-                if (socket && player) {
-                    try {
-                        console.log("Sende God-Mode-Status an Server:", ADMIN_CONFIG.GOD_MODE);
-                        socket.emit('toggle_god_mode', ADMIN_CONFIG.GOD_MODE);
-                    } catch (e) {
-                        console.error("Fehler beim Senden des God-Mode-Status:", e);
-                    }
-                } else {
-                    console.warn("Socket oder Player nicht bereit für God-Mode-Änderung");
-                }
-
-                // Benachrichtigung
-                createNotification(`God-Mode ${ADMIN_CONFIG.GOD_MODE ? 'aktiviert' : 'deaktiviert'}`);
-            });
-
-            // Bot-Spawn-Button
-            document.getElementById('admin-spawn-bot-btn').addEventListener('click', () => {
-                // Bot-Spawn-Befehl an Server senden
-                socket.emit('admin_spawn_bot');
-                createNotification('Bot gespawnt');
-            });
-
-            // Level-Geben-Button
-            document.getElementById('admin-give-level-btn').addEventListener('click', () => {
-                if (!ADMIN_CONFIG.SELECTED_PLAYER_ID) {
-                    createNotification('Bitte wähle zuerst einen Spieler aus', 2000);
-                    return;
-                }
-
-                const levels = parseInt(document.getElementById('admin-level-input').value, 10);
-                if (isNaN(levels) || levels < 1) {
-                    createNotification('Bitte gebe eine gültige Level-Anzahl ein', 2000);
-                    return;
-                }
-
-                // Level-Befehl an Server senden
-                socket.emit('admin_give_levels', {
-                    playerId: ADMIN_CONFIG.SELECTED_PLAYER_ID,
-                    levels: levels
-                });
-
-                createNotification(`${levels} Level an ${players[ADMIN_CONFIG.SELECTED_PLAYER_ID]?.name || 'Spieler'} gegeben`);
-            });
-
-            // Spieler-Töten-Button
-            document.getElementById('admin-kill-player-btn').addEventListener('click', () => {
-                if (!ADMIN_CONFIG.SELECTED_PLAYER_ID) {
-                    createNotification('Bitte wähle zuerst einen Spieler aus', 2000);
-                    return;
-                }
-
-                if (ADMIN_CONFIG.SELECTED_PLAYER_ID === socket.id) {
-                    createNotification('Du kannst dich nicht selbst töten', 2000);
-                    return;
-                }
-
-                // Kill-Befehl an Server senden
-                socket.emit('admin_kill_player', {
-                    playerId: ADMIN_CONFIG.SELECTED_PLAYER_ID
-                });
-
-                createNotification(`Spieler ${players[ADMIN_CONFIG.SELECTED_PLAYER_ID]?.name || 'unbekannt'} wurde eliminiert`);
-            });
 
             // Admin-Panel öffnen
             function openAdminPanel() {
@@ -2258,24 +2283,6 @@
                     }
                 }
             }
-
-            // Vor dem Verlassen der Seite Spieldaten senden
-            window.addEventListener('beforeunload', () => {
-                if (playerToken && player) {
-                    // Sende Spielstatistiken
-                    const gameTime = (Date.now() - gameStartTime) / 1000; // in Sekunden
-
-                    // Benutze sendBeacon statt fetch, da es zuverlässiger bei unload events ist
-                    navigator.sendBeacon(`https://nm-web.de/game_end.php?token=${playerToken}`, 
-                        JSON.stringify({
-                            playtime: gameTime,
-                            kills: player.kills || 0,
-                            max_level: player.level || 1,
-                            score: player.score || 0
-                        })
-                    );
-                }
-            });
 
             // Mobile Steuerung einrichten
             function setupMobileControls() {
@@ -2471,6 +2478,24 @@
                     document.removeEventListener('click', requestFullScreen);
                 }, { once: true });
             }
+
+            // Vor dem Verlassen der Seite Spieldaten senden
+            window.addEventListener('beforeunload', () => {
+                if (playerToken && player) {
+                    // Sende Spielstatistiken
+                    const gameTime = (Date.now() - gameStartTime) / 1000; // in Sekunden
+
+                    // Benutze sendBeacon statt fetch, da es zuverlässiger bei unload events ist
+                    navigator.sendBeacon(`https://nm-web.de/game_end.php?token=${playerToken}`, 
+                        JSON.stringify({
+                            playtime: gameTime,
+                            kills: player.kills || 0,
+                            max_level: player.level || 1,
+                            score: player.score || 0
+                        })
+                    );
+                }
+            });
 
             // Mobil-Steuerung nach dem Starten des Spiels einrichten
             document.addEventListener('DOMContentLoaded', function() {
