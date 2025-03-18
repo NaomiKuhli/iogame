@@ -164,58 +164,54 @@ io.on('connection', (socket) => {
 
     // Spieler beitritt verarbeiten
     socket.on('join', (data) => {
+        console.log("Spieler verbindet sich:", data);
+        
         // Falls kein Data-Objekt übergeben wird, erstellen wir eines
         if (!data) data = {};
-
-        // Upgrade-Handling für angemeldete Nutzer
-        if (data && data.token) {
-            // Token aus den Daten extrahieren
-            const userToken = data.token;
-
-            // Aktives Upgrade verarbeiten, falls vorhanden
-            if (data.upgrade) {
-                const upgradeCode = data.upgrade;
-
-                // Upgrade-Effekte anwenden
-                switch(upgradeCode) {
-                    case 'start_level_5':
-                        // Spieler auf Level 5 setzen
-                        player.level = 5;
-                        // XP und Skill-Punkte entsprechend anpassen
-                        player.availableUpgrades = 4; // 4 Skill-Punkte für Level 5
-                        player.xpToNextLevel = Math.floor(BASE_XP_FOR_LEVEL * Math.pow(1.2, player.level - 1));
-                        break;
-
-                    case 'god_mode_30':
-                        // 30 Sekunden Unsterblichkeit
-                        player.godMode = true;
-                        // Nach 30 Sekunden deaktivieren
-                        setTimeout(() => {
-                            if (players[socket.id]) {
-                                players[socket.id].godMode = false;
-                                io.to(socket.id).emit('godModeEnded');
-                            }
-                        }, 30000);
-                        break;
-
-                    case 'double_xp':
-                        // Doppelte XP
-                        player.xpMultiplier = 2;
-                        break;
-
-                    case 'double_cannon':
-                        // Doppelte Kanonen - zweite Kanone aktivieren
-                        player.doubleCannon = true;
-                        break;
-                }
-            }
-        }
-
+    
         // Spielername aus den Daten oder der URL-Query
         const query = socket.handshake.query;
         const playerName = data.name || query.name || 'Unbenannt';
-
-        // Neuen Spieler erstellen
+        
+        // Upgrade-Informationen extrahieren
+        let upgradeCode = null;
+        if (data && data.upgrade) {
+            upgradeCode = data.upgrade;
+            console.log(`Spieler ${playerName} möchte Upgrade verwenden: ${upgradeCode}`);
+        }
+    
+        // Standardwerte für Upgrade-Eigenschaften festlegen
+        const playerSettings = {
+            doubleCannon: false,
+            xpMultiplier: 1,
+            godMode: false,
+            level: 1,
+            availableUpgrades: 0
+        };
+        
+        // Upgrade-Einstellungen vorverarbeiten
+        if (upgradeCode) {
+            console.log(`Verarbeite Upgrade: ${upgradeCode}`);
+            switch(upgradeCode) {
+                case 'start_level_5':
+                    playerSettings.level = 5;
+                    playerSettings.availableUpgrades = 4;
+                    break;
+                case 'god_mode_30':
+                    playerSettings.godMode = true;
+                    break;
+                case 'double_xp':
+                    playerSettings.xpMultiplier = 2;
+                    break;
+                case 'double_cannon':
+                    playerSettings.doubleCannon = true;
+                    break;
+                default:
+                    console.log(`Unbekanntes Upgrade: ${upgradeCode}`);
+            }
+        }
+    
+        // Neuen Spieler erstellen - jetzt mit den Upgrade-Eigenschaften
         const player = {
             id: socket.id,
             name: playerName,
@@ -225,9 +221,9 @@ io.on('connection', (socket) => {
             health: BASE_STATS.maxHealth,
             maxHealth: BASE_STATS.maxHealth,
             score: 0,
-            level: 1,
+            level: playerSettings.level,
             xp: 0,
-            xpToNextLevel: BASE_XP_FOR_LEVEL,
+            xpToNextLevel: BASE_XP_FOR_LEVEL * Math.pow(1.2, playerSettings.level - 1),
             totalXp: 0,
             upgrades: {
                 healthRegen: { level: 1, max: 10 },
@@ -239,28 +235,43 @@ io.on('connection', (socket) => {
                 reload: { level: 1, max: 10 },
                 movementSpeed: { level: 1, max: 10 }
             },
-            totalUpgrades: 0, // Zähler für die Gesamtzahl der Upgrades
-            maxTotalUpgrades: 45, // Erhöht von 33 auf 45
-            availableUpgrades: 0, // Anzahl verfügbarer Skill-Punkte für Level-Ups
-            isLeader: false, // Ob der Spieler auf Platz 1 der Bestenliste ist
+            totalUpgrades: 0,
+            maxTotalUpgrades: 45,
+            availableUpgrades: playerSettings.availableUpgrades,
+            isLeader: false,
             lastShootTime: 0,
-            lastActiveTime: Date.now(), // Zeit für Inaktivitätsprüfung
-            godMode: false // NEU: God-Mode-Status
+            lastActiveTime: Date.now(),
+            // Die vorverarbeiteten Upgrade-Eigenschaften
+            godMode: playerSettings.godMode,
+            doubleCannon: playerSettings.doubleCannon,
+            xpMultiplier: playerSettings.xpMultiplier
         };
-
+    
         // Spieler zum Spiel hinzufügen
         players[socket.id] = player;
-
+    
+        // Nachträgliche Verarbeitung des God-Mode-Timers
+        if (playerSettings.godMode) {
+            console.log(`God Mode Timer für ${playerName} gestartet (30s)`);
+            setTimeout(() => {
+                if (players[socket.id]) {
+                    players[socket.id].godMode = false;
+                    io.to(socket.id).emit('godModeEnded');
+                    console.log(`God Mode für ${playerName} beendet`);
+                }
+            }, 30000);
+        }
+    
         // Initialen Spielzustand an Spieler senden
         socket.emit('init', {
             player,
             players,
             blocks
         });
-
+    
         // Neuen Spieler an alle anderen Spieler senden
         socket.broadcast.emit('playerJoined', player);
-
+    
         // Bestenliste aktualisieren
         updateLeaderboard();
     });
