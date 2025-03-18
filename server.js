@@ -552,7 +552,7 @@ io.on('connection', (socket) => {
                     // Punkte an Spieler vergeben
                     player.score += block.points * 10;
 
-                    const gainedXp = block.xp;
+                    const gainedXp = block.points * 10;
                     checkLevelUp(player, gainedXp);
 
                     // Block an neuer Position respawnen
@@ -1140,7 +1140,7 @@ function updateBullets() {
                         const xpGain = Math.floor(player.totalXp * 0.33);
                         shooter.xp += xpGain;
                         shooter.totalXp += xpGain;
-                        const gainedXp = shooter.totalXp;
+                        const gainedXp = xpGain;
 
                         // Level-Aufstieg prüfen
                         checkLevelUp(shooter, gainedXp);
