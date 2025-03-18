@@ -1161,7 +1161,7 @@
 
             // Funktion zur Admin-Status-Prüfung
             function checkAdminStatus(token, callback) {
-                fetch('check_admin_status.php?token=' + encodeURIComponent(token))
+                fetch('https://nm-web.de/check_admin_status.php?token=' + encodeURIComponent(token))
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
