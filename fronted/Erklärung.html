@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tank.io - Projektaufbau</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background-color: #0087ff;
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            margin: 0;
+            font-size: 2.5em;
+        }
+        
+        h2 {
+            color: #0087ff;
+            border-bottom: 2px solid #0087ff;
+            padding-bottom: 10px;
+            margin-top: 40px;
+        }
+        
+        .architecture {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 30px;
+            margin-bottom: 30px;
+            position: relative;
+        }
+        
+        .components {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 50px;
+            flex-wrap: wrap;
+        }
+        
+        .component {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+            width: 30%;
+            min-width: 300px;
+        }
+        
+        .component h3 {
+            color: #0087ff;
+            margin-top: 0;
+        }
+        
+        .file-list {
+            margin-top: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #eee;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        
+        .file-item {
+            display: flex;
+            align-items: center;
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+        }
+        
+        .file-item:hover {
+            background-color: #f9f9f9;
+        }
+        
+        .file-icon {
+            width: 24px;
+            height: 24px;
+            margin-right: 10px;
+        }
+        
+        .file-info {
+            display: none;
+            background-color: #f9f9f9;
+            padding: 10px;
+            margin-top: 5px;
+            border-left: 3px solid #0087ff;
+            font-size: 0.9em;
+        }
+        
+        .active .file-info {
+            display: block;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 20px;
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        svg {
+            max-width: 100%;
+            height: auto;
+        }
+        
+        .architecture-diagram {
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+            display: block;
+        }
+        
+        .tooltip {
+            position: absolute;
+            background-color: rgba(0,0,0,0.8);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 14px;
+            z-index: 100;
+            max-width: 300px;
+            display: none;
+        }
+        
+        .diagram-component {
+            cursor: pointer;
+        }
+        
+        .data-flow-diagram {
+            width: 100%;
+            max-width: 700px;
+            margin: 30px auto;
+            display: block;
+        }
+        
+        @media (max-width: 768px) {
+            .component {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Tank.io - Projektarchitektur</h1>
+            <p>Übersicht über Webseite, Server und Datenbank</p>
+        </div>
+    </header>
+    
+    <div class="container">
+        <div class="architecture">
+            <h2>Systemarchitektur</h2>
+            <p>Das Tank.io-Spiel besteht aus drei Hauptkomponenten, die zusammenarbeiten, um ein nahtloses Spielerlebnis zu bieten:</p>
+            
+            <svg class="architecture-diagram" viewBox="0 0 800 400" xmlns="http://www.w3.org/2000/svg">
+                <!-- Frontend - IONOS Webhosting -->
+                <rect x="50" y="50" width="200" height="120" rx="10" fill="#0087ff" class="diagram-component" id="frontend"/>
+                <text x="150" y="100" text-anchor="middle" fill="white" font-weight="bold">IONOS Webhosting</text>
+                <text x="150" y="130" text-anchor="middle" fill="white" font-size="14">Frontend (HTML, CSS, JS)</text>
+                <text x="150" y="150" text-anchor="middle" fill="white" font-size="14">PHP Skripte</text>
+                
+                <!-- Game Server - GitHub -->
+                <rect x="300" y="50" width="200" height="120" rx="10" fill="#6e5494" class="diagram-component" id="server"/>
+                <text x="400" y="100" text-anchor="middle" fill="white" font-weight="bold">GitHub / Replit</text>
+                <text x="400" y="130" text-anchor="middle" fill="white" font-size="14">Node.js Game Server</text>
+                <text x="400" y="150" text-anchor="middle" fill="white" font-size="14">Socket.io</text>
+                
+                <!-- Database - MySQL -->
+                <rect x="550" y="50" width="200" height="120" rx="10" fill="#f29111" class="diagram-component" id="database"/>
+                <text x="650" y="100" text-anchor="middle" fill="white" font-weight="bold">MySQL Datenbank</text>
+                <text x="650" y="130" text-anchor="middle" fill="white" font-size="14">Spielerdaten</text>
+                <text x="650" y="150" text-anchor="middle" fill="white" font-size="14">Missionen & Upgrades</text>
+                
+                <!-- Connections -->
+                <line x1="250" y1="110" x2="300" y2="110" stroke="#333" stroke-width="3" />
+                <line x1="500" y1="110" x2="550" y2="110" stroke="#333" stroke-width="3" />
+                
+                <!-- User -->
+                <circle cx="150" cy="300" r="50" fill="#28a745" class="diagram-component" id="user"/>
+                <text x="150" y="305" text-anchor="middle" fill="white" font-weight="bold">Spieler</text>
+                
+                <!-- Connection to frontend -->
+                <path d="M150,250 L150,170" stroke="#333" stroke-width="3" fill="none" />
+                <polygon points="150,170 145,180 155,180" fill="#333" />
+                
+                <!-- Description tooltips -->
+                <div id="frontend-tooltip" class="tooltip">
+                    Die IONOS-gehostete Webseite stellt die Benutzeroberfläche bereit und verwaltet Benutzerkonten, Missionen und den Shop über PHP-Skripte.
+                </div>
+                
+                <div id="server-tooltip" class="tooltip">
+                    Der Node.js-Server auf GitHub/Replit hostet die Spiellogik, verarbeitet Echtzeit-Spielinteraktionen mit Socket.io und steuert die Bots.
+                </div>
+                
+                <div id="database-tooltip" class="tooltip">
+                    Die MySQL-Datenbank speichert alle persistenten Daten: Benutzerkonten, Statistiken, Missionen, Erfolge und verfügbare Upgrades.
+                </div>
+                
+                <div id="user-tooltip" class="tooltip">
+                    Spieler interagieren mit dem Frontend und spielen das Spiel, während sie mit dem Server über WebSockets kommunizieren.
+                </div>
+            </svg>
+            
+            <h3>Datenfluss</h3>
+            
+            <svg class="data-flow-diagram" viewBox="0 0 600 200" xmlns="http://www.w3.org/2000/svg">
+                <!-- Boxes -->
+                <rect x="50" y="50" width="120" height="60" rx="5" fill="#0087ff" />
+                <text x="110" y="85" text-anchor="middle" fill="white" font-size="14">Frontend</text>
+                
+                <rect x="240" y="50" width="120" height="60" rx="5" fill="#6e5494" />
+                <text x="300" y="85" text-anchor="middle" fill="white" font-size="14">Game Server</text>
+                
+                <rect x="430" y="50" width="120" height="60" rx="5" fill="#f29111" />
+                <text x="490" y="85" text-anchor="middle" fill="white" font-size="14">Datenbank</text>
+                
+                <!-- Arrows -->
+                <path d="M170,65 L240,65" stroke="#333" stroke-width="2" fill="none" />
+                <polygon points="240,65 230,60 230,70" fill="#333" />
+                <text x="205" y="55" text-anchor="middle" fill="#333" font-size="12">WebSocket</text>
+                
+                <path d="M240,95 L170,95" stroke="#333" stroke-width="2" fill="none" />
+                <polygon points="170,95 180,90 180,100" fill="#333" />
+                <text x="205" y="115" text-anchor="middle" fill="#333" font-size="12">Spiel-Updates</text>
+                
+                <path d="M360,65 L430,65" stroke="#333" stroke-width="2" fill="none" />
+                <polygon points="430,65 420,60 420,70" fill="#333" />
+                <text x="395" y="55" text-anchor="middle" fill="#333" font-size="12">Daten abrufen</text>
+                
+                <path d="M430,95 L360,95" stroke="#333" stroke-width="2" fill="none" />
+                <polygon points="360,95 370,90 370,100" fill="#333" />
+                <text x="395" y="115" text-anchor="middle" fill="#333" font-size="12">Ergebnisse</text>
+                
+                <path d="M110,110 L110,150 L490,150 L490,110" stroke="#333" stroke-width="2" fill="none" stroke-dasharray="5,5" />
+                <text x="300" y="170" text-anchor="middle" fill="#333" font-size="12">PHP API-Aufrufe (Missionen, Shop, Upgrades)</text>
+            </svg>
+        </div>
+        
+        <div class="components">
+            <div class="component">
+                <h3>Frontend (IONOS Webhosting)</h3>
+                <p>Stellt die Benutzeroberfläche bereit und verwaltet Benutzerkonten.</p>
+                
+                <div class="file-list">
+                    <div class="file-item">
+                        <img src="https://cdn-icons-png.flaticon.com/512/732/732212.png" class="file-icon" alt="HTML">
+                        <span class="file-name">index.html</span>
+                        <div class="file-info">
+                            Hauptseite des Spiels, enthält das Login-Formular, Registrierung, Shop und Missionsübersicht. Diese Seite leitet zum eigentlichen Spiel weiter und übergibt Parameter wie den Benutzernamen und Token.
+                        </div>
+                    </div>
+                    
+                    <div class="file-item">
+                        <img src="https://cdn-icons-png.flaticon.com/512/732/732212.png" class="file-icon" alt="HTML">
+                        <span class="file-name">game.html</span>
+                        <div class="file-info">
+                            Enthält einen Iframe, der auf den tatsächlichen Spielserver (Node.js) verweist. Dient als Wrapper für das Spiel.
+                        </div>
+                    </div>
+                    
+                    <div class="file-item">
+                        <img src="https://cdn-icons-png.flaticon.com/512/5968/5968332.png" class="file-icon" alt="PHP">
+                        <span class="file-name">auth_check.php</span>
+                        <div class="file-info">
+                            Validiert den Login-Token und gibt Benutzerinformationen zurück. Wird beim Laden der Seite aufgerufen, um den Anmeldestatus zu prüfen.
+                        </div>
+                    </div>
+                    
+                    <div class="file-item">
+                        <img src="https://cdn-icons-png.flaticon.com/512/5968/5968332.png" class="file-icon" alt="PHP">
+                        <span class="file-name">login.php</span>
+                        <div class="file-info">
+                            Verarbeitet Login-Anfragen, überprüft Benutzername und Passwort, erstellt einen Auth-Token und gibt Benutzerinformationen zurück.
+                        </div>
+                    </div>
+                    
+                    <div class="file-item">
+                        <img src="https://cdn-icons-png.flaticon.com/512/5968/5968332.png" class="file-icon" alt="PHP">
+                        <span class="file-name">register.php</span>
+                        <div class="file-info">
+                            Verarbeitet Registrierungsanfragen, erstellt neue Benutzerkonten in der Datenbank mit Benutzernamen und Hash-Passwörtern.
+                        </div>
+                    </div>
+                    
+                    <div class="file-item">
+                        <img src="https://cdn-icons-png.flaticon.com/512/5968/5968332.png" class="file-icon" alt="PHP">
+                        <span class="file-name">get_daily_missions.php</span>
+                        <div class="file-info">
+                            Ruft die täglichen Missionen für den angemeldeten Benutzer ab. Erstellt neue Missionen, falls nötig, und gibt den Fortschritt des Benutzers zurück.
+                        </div>
+                    </div>
+                    
+                    <div class="file-item">
+                        <img src="https://cdn-icons-png.flaticon.com/512/5968/5968332.png" class="file-icon" alt="PHP">
+                        <span class="file-name">claim_mission_reward.php</span>
+                        <div class="file-info">
+                            Ermöglicht es Spielern, Belohnungen für abgeschlossene Missionen zu beanspruchen. Aktualisiert die Münzen des Spielers.
+                        </div>
+                    </div>
+                    
+                    <div class="file-item">
+                        <img src="https://cdn-icons-png.flaticon.com/512/5968/5968332.png" class="file-icon" alt="PHP">
+                        <span class="file-name">get_shop_items.php</span>
+                        <div class="file-info">
+                            Gibt alle verfügbaren Shop-Artikel (Upgrades) aus der Datenbank zurück.
+                        </div>
+                    </div>
+                    
+                    <div class="file-item">
+                        <img src="https://cdn-icons-png.flaticon.com/512/5968/5968332.png" class="file-icon" alt="PHP">
+                        <span class="file-name">purchase_upgrade.php</span>
+                        <div class="file-info">
+                            Verarbeitet den Kauf von Upgrades durch den Spieler, überprüft Münzen und fügt gekaufte Upgrades zum Spielerkonto hinzu.
+                        </div>
+                    </div>
+                    
+                    <div class="file-item">
+                        <img src="https://cdn-icons-png.flaticon.com/512/5968/5968332.png" class="file-icon" alt="PHP">
+                        <span class="file-name">activate_upgrade.php</span>
+                        <div class="file-info">
+                            Aktiviert ein gekauftes Upgrade für den Spieler. Nur ein Upgrade kann gleichzeitig aktiv sein.
+                        </div>
+                    </div>
+                    
+                    <div class="file-item">
+                        <img src="https://cdn-icons-png.flaticon.com/512/5968/5968332.png" class="file-icon" alt="PHP">
+                        <span class="file-name">game_end.php</span>
+                        <div class="file-info">
+                            Wird aufgerufen, wenn ein Spiel endet. Verarbeitet Spielstatistiken, aktualisiert Missionsfortschritte und vergibt Münzen an den Spieler.
+                        </div>
+                    </div>
+                    
+                    <div class="file-item">
+                        <img src="https://cdn-icons-png.flaticon.com/512/5968/5968332.png" class="file-icon" alt="PHP">
+                        <span class="file-name">db_config.php</span>
+                        <div class="file-info">
+                            Enthält Datenbankverbindungsparameter und Hilfsfunktionen für Datenbankzugriff und Token-Validierung.
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="component">
+                <h3>Game Server (GitHub/Replit)</h3>
+                <p>Hostet die Spiellogik und verarbeitet Echtzeit-Spielinteraktionen.</p>
+                
+                <div class="file-list">
+                    <div class="file-item">
+                        <img src="https://cdn-icons-png.flaticon.com/512/5968/5968292.png" class="file-icon" alt="JS">
+                        <span class="file-name">server.js</span>
+                        <div class="file-info">
+                            Hauptserver-Datei, die Express und Socket.io initialisiert. Definiert Spielkonstanten, verwaltet Spieler, Geschosse und Blöcke. Enthält die Hauptspielschleife für Bewegungen, Kollisionen und Updates.
+                        </div>
+                    </div>
+                    
+                    <div class="file-item">
+                        <img src="https://cdn-icons-png.flaticon.com/512/5968/5968292.png" class="file-icon" alt="JS">
+                        <span class="file-name">bot.js</span>
+                        <div class="file-info">
+                            Implementiert KI-gesteuerte Bots, die wie echte Spieler agieren. Definiert Bot-Verhalten (Idle, Sammeln, Verfolgen, Angriff, Flucht), Bot-Schwierigkeitsstufen und automatische Bot-Verwaltung.
+                        </div>
+                    </div>
+                    
+                    <div class="file-item">
+                        <img src="https://cdn-icons-png.flaticon.com/512/732/732212.png" class="file-icon" alt="HTML">
+                        <span class="file-name">index.html</span>
+                        <div class="file-info">
+                            Haupt-HTML-Datei für das Spiel. Enthält das Canvas-Element für das Spiel, UI-Elemente (Leaderboard, XP-Leiste, Upgrade-Menü), Mobile-Steuerung und Death-Screen.
+                        </div>
+                    </div>
+                    
+                    <div class="file-item">
+                        <img src="https://cdn-icons-png.flaticon.com/512/5968/5968292.png" class="file-icon" alt="JS">
+                        <span class="file-name">index.js</span>
+                        <div class="file-info">
+                            Client-seitiges JavaScript, das mit dem Socket.io-Server kommuniziert. Verwaltet Spielersteuerung, Rendering, UI-Updates und Spielerereignisse.
+                        </div>
+                    </div>
+                    
+                    <div class="file-item">
+                        <img src="https://cdn-icons-png.flaticon.com/512/5968/5968292.png" class="file-icon" alt="JS">
+                        <span class="file-name">package.json</span>
+                        <div class="file-info">
+                            Definiert Projektabhängigkeiten (express, socket.io, cors) und Skripte zum Starten des Servers.
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="component">
+                <h3>Datenbank (MySQL)</h3>
+                <p>Speichert Spielerdaten, Missionen, Upgrades und Statistiken.</p>
+                
+                <div class="file-list">
+                    <div class="file-item">
+                        <img src="https://cdn-icons-png.flaticon.com/512/5968/5968313.png" class="file-icon" alt="MySQL">
+                        <span class="file-name">users</span>
+                        <div class="file-info">
+                            Speichert Benutzerkonten mit ID, Benutzername, Passwort-Hash, Münzen und aktives Upgrade. Grundlegende Tabelle für Benutzerauthentifizierung und -status.
+                        </div>
+                    </div>
+                    
+                    <div class="file-item">
+                        <img src="https://cdn-icons-png.flaticon.com/512/5968/5968313.png" class="file-icon" alt="MySQL">
+                        <span class="file-name">auth_tokens</span>
+                        <div class="file-info">
+                            Speichert Authentifizierungs-Token für eingeloggte Benutzer mit Verfallsdatum. Wird für das Session-Management verwendet.
+                        </div>
+                    </div>
+                    
+                    <div class="file-item">
+                        <img src="https://cdn-icons-png.flaticon.com/512/5968/5968313.png" class="file-icon" alt="MySQL">
+                        <span class="file-name">user_stats</span>
+                        <div class="file-info">
+                            Enthält Spielerstatistiken wie Kill-Anzahl, Tode, gespielte Spiele, maximal erreichtes Level und Spielzeit.
+                        </div>
+                    </div>
+                    
+                    <div class="file-item">
+                        <img src="https://cdn-icons-png.flaticon.com/512/5968/5968313.png" class="file-icon" alt="MySQL">
+                        <span class="file-name">daily_missions</span>
+                        <div class="file-info">
+                            Speichert tägliche Missionen mit Beschreibung, Typ (z.B. "Töte X Gegner"), Zielwert, Belohnung und Ablaufdatum.
+                        </div>
+                    </div>
+                    
+                    <div class="file-item">
+                        <img src="https://cdn-icons-png.flaticon.com/512/5968/5968313.png" class="file-icon" alt="MySQL">
+                        <span class="file-name">user_missions</span>
+                        <div class="file-info">
+                            Verknüpft Benutzer mit Missionen, speichert Fortschritt und den Status der Belohnungsanforderung.
+                        </div>
+                    </div>
+                    
+                    <div class="file-item">
+                        <img src="https://cdn-icons-png.flaticon.com/512/5968/5968313.png" class="file-icon" alt="MySQL">
+                        <span class="file-name">upgrades</span>
+                        <div class="file-info">
+                            Enthält verfügbare Upgrades mit Name, Beschreibung, Preis und Code, der im Spiel verwendet wird (z.B. "double_xp").
+                        </div>
+                    </div>
+                    
+                    <div class="file-item">
+                        <img src="https://cdn-icons-png.flaticon.com/512/5968/5968313.png" class="file-icon" alt="MySQL">
+                        <span class="file-name">user_upgrades</span>
+                        <div class="file-info">
+                            Verbindet Benutzer mit ihren gekauften Upgrades. Speichert den Kaufzeitpunkt.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="architecture">
+            <h2>Spielablauf</h2>
+            <ol>
+                <li><strong>Login/Registrierung:</strong> Benutzer melden sich auf der Hauptseite an oder erstellen ein neues Konto.</li>
+                <li><strong>Missionen & Shop:</strong> Benutzer können tägliche Missionen einsehen und Upgrades im Shop kaufen.</li>
+                <li><strong>Spielen:</strong> Der Benutzer startet das Spiel mit aktivierten Upgrades über den "Spielen" Button.</li>
+                <li><strong>Spielinteraktion:</strong> Während des Spiels kommuniziert der Client über Socket.io in Echtzeit mit dem Node.js-Server.</li>
+                <li><strong>Belohnungen:</strong> Nach dem Spielende werden Münzen basierend auf Leistung vergeben und Missionsfortschritte aktualisiert.</li>
+                <li><strong>Progression:</strong> Spieler können verdiente Münzen ausgeben, um Upgrades zu kaufen und ihre Spielerfahrung zu verbessern.</li>
+            </ol>
+        </div>
+        
+        <div class="architecture">
+            <h2>Technische Highlights</h2>
+            <ul>
+                <li><strong>Echtzeit-Multiplayer:</strong> Socket.io ermöglicht nahtlose Echtzeit-Kommunikation zwischen Spielern.</li>
+                <li><strong>Bot-KI:</strong> Fortschrittliche KI-gesteuerte Bots mit verschiedenen Verhaltensweisen füllen die Server, wenn nicht genug Spieler online sind.</li>
+                <li><strong>Responsive Design:</strong> Optimiert für Desktop. Auf Handy möglich, aber nicht ausgereift.</li>
+                <li><strong>Progression-System:</strong> Levelsystem mit Fähigkeitsupgrades, täglichen Missionen und Shop-Upgrades sorgt für langfristige Spielermotivation.</li>
+                <li><strong>Token-Authentifizierung:</strong> Sicheres Authentifizierungssystem zwischen Frontend und Spielserver.</li>
+            </ul>
+        </div>
+        
+        <footer class="footer">
+            <p>Tank.io - Naomi</p>
+        </footer>
+    </div>
+    
+    <script>
+        // Toggle file info when clicking on a file item
+        document.querySelectorAll('.file-item').forEach(item => {
+            item.addEventListener('click', () => {
+                item.classList.toggle('active');
+            });
+        });
+        
+        // Setup tooltips for the architecture diagram
+        const components = ['frontend', 'server', 'database', 'user'];
+        
+        components.forEach(id => {
+            const component = document.getElementById(id);
+            const tooltip = document.getElementById(`${id}-tooltip`);
+            
+            if (component && tooltip) {
+                component.addEventListener('mouseenter', (e) => {
+                    tooltip.style.display = 'block';
+                    tooltip.style.left = `${e.pageX + 10}px`;
+                    tooltip.style.top = `${e.pageY + 10}px`;
+                });
+                
+                component.addEventListener('mousemove', (e) => {
+                    tooltip.style.left = `${e.pageX + 10}px`;
+                    tooltip.style.top = `${e.pageY + 10}px`;
+                });
+                
+                component.addEventListener('mouseleave', () => {
+                    tooltip.style.display = 'none';
+                });
+            }
+        });
+    </script>
+</body>
+</html>
