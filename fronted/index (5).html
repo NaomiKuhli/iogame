@@ -1,0 +1,1301 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tank.io - nm-web.de</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            height: 100%;
+            background: linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.3));
+        }
+
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            position: relative;
+        }
+
+        .menu {
+            background-color: white;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+            max-width: 500px;
+            width: 100%;
+            position: relative;
+        }
+
+        h1 {
+            font-size: 48px;
+            color: #333;
+            margin-top: 0;
+            margin-bottom: 20px;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            padding: 12px 15px;
+            font-size: 18px;
+            width: 80%;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            outline: none;
+            margin: 10px 0;
+        }
+
+        .play-button,
+        .regular-button {
+            background-color: #0087ff;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin: 10px 5px;
+        }
+
+        .play-button:hover,
+        .regular-button:hover {
+            background-color: #0066cc;
+        }
+
+        .regular-button {
+            background-color: #28a745;
+            font-size: 16px;
+            padding: 10px 20px;
+        }
+
+        .regular-button.secondary {
+            background-color: #6c757d;
+        }
+
+        .updates {
+            margin-top: 20px;
+            text-align: left;
+        }
+
+        .updates ul {
+            padding-left: 20px;
+        }
+
+        .updates li {
+            margin-bottom: 5px;
+        }
+
+        /* Neu: Account-Bereich */
+        .account-area {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .logout-btn {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 10px;
+            font-size: 14px;
+        }
+
+        .coins-display {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background-color: rgba(0, 0, 0, 0.6);
+            color: gold;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+        }
+
+        .coins-icon {
+            color: gold;
+            margin-right: 8px;
+        }
+
+        /* Modals für Login, Registrierung, Shop und Missionen */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 20px;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 500px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+
+        .close {
+            position: absolute;
+            right: 20px;
+            top: 15px;
+            font-size: 28px;
+            font-weight: bold;
+            color: #aaa;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        /* Shop-Bereich */
+        .shop-items {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .shop-item {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            position: relative;
+            transition: transform 0.2s;
+        }
+
+        .shop-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .shop-item.active {
+            border-color: #28a745;
+            background-color: rgba(40, 167, 69, 0.1);
+        }
+
+        .shop-item.owned {
+            border-color: #0087ff;
+        }
+
+        .shop-item h3 {
+            margin-top: 0;
+            font-size: 18px;
+        }
+
+        .shop-item p {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .shop-item .price {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 10px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .shop-item .actions {
+            margin-top: 15px;
+        }
+
+        /* Missions-Bereich */
+        .mission-item {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        .mission-item h3 {
+            margin-top: 0;
+            font-size: 18px;
+        }
+
+        .mission-progress {
+            width: 100%;
+            height: 10px;
+            background-color: #eee;
+            border-radius: 5px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+
+        .mission-progress-bar {
+            height: 100%;
+            background-color: #28a745;
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        .mission-reward {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            display: flex;
+            align-items: center;
+            color: gold;
+            font-weight: bold;
+        }
+
+        .mission-complete {
+            background-color: rgba(40, 167, 69, 0.1);
+            border-color: #28a745;
+        }
+
+        .mission-complete .mission-progress-bar {
+            background-color: #28a745;
+            width: 100%;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            border-bottom: none;
+            border-radius: 5px 5px 0 0;
+            margin-right: 5px;
+        }
+
+        .tab.active {
+            background-color: white;
+            border-bottom: 1px solid white;
+            margin-bottom: -1px;
+            font-weight: bold;
+        }
+
+        .error-message,
+        .success-message {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+
+        .error-message {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .success-message {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        /* Tooltips */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* Navigationsbuttons */
+        .nav-buttons {
+            display: flex;
+            justify-content: space-around;
+            margin: 15px 0;
+        }
+
+        .nav-btn {
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px 15px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: all 0.2s;
+        }
+
+        .nav-btn:hover {
+            background-color: #e9ecef;
+            transform: translateY(-3px);
+        }
+
+        .nav-btn i {
+            font-size: 24px;
+            margin-bottom: 5px;
+            color: #0087ff;
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left: 4px solid #0087ff;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+            display: none;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Haupt-Menü -->
+        <div class="menu">
+            <h1>Tank.io</h1>
+
+            <!-- Für nicht angemeldete Benutzer -->
+            <div id="guest-area">
+                <input type="text" id="player-name" placeholder="Gib deinen Namen ein" maxlength="15">
+                <button class="play-button" id="play-button">Spielen!</button>
+                <div style="margin-top: 15px;">
+                    <button class="regular-button" id="login-btn">Anmelden</button>
+                    <button class="regular-button" id="register-btn">Registrieren</button>
+                </div>
+            </div>
+
+            <!-- Für angemeldete Benutzer -->
+            <div id="user-area" style="display: none;">
+                <div class="nav-buttons">
+                    <div class="nav-btn" id="missions-btn">
+                        <i class="fas fa-tasks"></i>
+                        <span>Missionen</span>
+                    </div>
+                    <div class="nav-btn" id="shop-btn">
+                        <i class="fas fa-store"></i>
+                        <span>Shop</span>
+                    </div>
+                    <div class="nav-btn" id="profile-btn">
+                        <i class="fas fa-user"></i>
+                        <span>Profil</span>
+                    </div>
+                </div>
+                <button class="play-button" id="play-button-user">Spielen!</button>
+            </div>
+
+            <div class="updates">
+                <h3>Neueste Updates:</h3>
+                <ul>
+                    <li>Keins</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Account-Bereich (angezeigt, wenn angemeldet) -->
+        <div id="account-display" class="account-area" style="display: none;">
+            <span id="username-display">Willkommen, Spieler</span>
+            <button class="logout-btn" id="logout-btn">Abmelden</button>
+        </div>
+
+        <!-- Coins-Anzeige (angezeigt, wenn angemeldet) -->
+        <div id="coins-display" class="coins-display" style="display: none;">
+            <i class="fas fa-coins coins-icon"></i>
+            <span id="coins-amount">0</span>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div id="login-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="close-login">&times;</span>
+            <h2>Anmelden</h2>
+            <div id="login-error" class="error-message" style="display: none;"></div>
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="login-username">Benutzername:</label>
+                    <input type="text" id="login-username" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="login-password">Passwort:</label>
+                    <input type="password" id="login-password" name="password" required>
+                </div>
+                <button type="submit" class="regular-button">Anmelden</button>
+                <div class="spinner" id="login-spinner"></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Registrierungs-Modal -->
+    <div id="register-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="close-register">&times;</span>
+            <h2>Registrieren</h2>
+            <div id="register-error" class="error-message" style="display: none;"></div>
+            <div id="register-success" class="success-message" style="display: none;"></div>
+            <form id="register-form">
+                <div class="form-group">
+                    <label for="register-username">Benutzername:</label>
+                    <input type="text" id="register-username" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="register-password">Passwort:</label>
+                    <input type="password" id="register-password" name="password" required>
+                </div>
+                <div class="form-group">
+                    <label for="register-password-confirm">Passwort bestätigen:</label>
+                    <input type="password" id="register-password-confirm" name="password_confirm" required>
+                </div>
+                <button type="submit" class="regular-button">Registrieren</button>
+                <div class="spinner" id="register-spinner"></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Shop Modal -->
+    <div id="shop-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="close-shop">&times;</span>
+            <h2>Shop</h2>
+            <p>Kaufe permanente Upgrades mit deinen Coins. Du kannst immer nur ein Upgrade gleichzeitig aktivieren.</p>
+            <div id="shop-error" class="error-message" style="display: none;"></div>
+            <div id="shop-success" class="success-message" style="display: none;"></div>
+            <div class="shop-items" id="shop-items">
+                <!-- Shop-Items werden dynamisch eingefügt -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Missions Modal -->
+    <div id="missions-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="close-missions">&times;</span>
+            <h2>Tägliche Missionen</h2>
+            <p>Schließe tägliche Missionen ab, um Coins zu verdienen. Die Missionen werden jeden Tag aktualisiert.</p>
+            <div id="missions-error" class="error-message" style="display: none;"></div>
+            <div id="missions-container">
+                <!-- Missionen werden dynamisch eingefügt -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Profil-Modal -->
+    <div id="profile-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="close-profile">&times;</span>
+            <h2>Dein Profil</h2>
+            <div id="profile-error" class="error-message" style="display: none;"></div>
+            <div id="profile-success" class="success-message" style="display: none;"></div>
+            <div>
+                <h3>Deine Statistiken</h3>
+                <p>Benutzername: <span id="profile-username"></span></p>
+                <p>Coins: <span id="profile-coins"></span></p>
+                <p>Gekaufte Upgrades: <span id="profile-upgrades-count"></span></p>
+                <p>Abgeschlossene Missionen: <span id="profile-completed-missions"></span></p>
+            </div>
+
+            <div style="margin-top: 20px;">
+                <h3>Passwort ändern</h3>
+                <form id="change-password-form">
+                    <div class="form-group">
+                        <label for="current-password">Aktuelles Passwort:</label>
+                        <input type="password" id="current-password" name="current_password" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="new-password">Neues Passwort:</label>
+                        <input type="password" id="new-password" name="new_password" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="new-password-confirm">Neues Passwort bestätigen:</label>
+                        <input type="password" id="new-password-confirm" name="new_password_confirm" required>
+                    </div>
+                    <button type="submit" class="regular-button">Passwort ändern</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Globale Variablen
+        let currentUser = null;
+        let userCoins = 0;
+        let userUpgrades = [];
+        let activeUpgrade = null;
+        let dailyMissions = [];
+
+        // DOM-Elemente
+        const guestArea = document.getElementById('guest-area');
+        const userArea = document.getElementById('user-area');
+        const accountDisplay = document.getElementById('account-display');
+        const coinsDisplay = document.getElementById('coins-display');
+        const usernameDisplay = document.getElementById('username-display');
+        const coinsAmount = document.getElementById('coins-amount');
+
+        // Modals
+        const loginModal = document.getElementById('login-modal');
+        const registerModal = document.getElementById('register-modal');
+        const shopModal = document.getElementById('shop-modal');
+        const missionsModal = document.getElementById('missions-modal');
+        const profileModal = document.getElementById('profile-modal');
+
+        // Modal-Schließen-Buttons
+        document.getElementById('close-login').addEventListener('click', () => loginModal.style.display = 'none');
+        document.getElementById('close-register').addEventListener('click', () => registerModal.style.display = 'none');
+        document.getElementById('close-shop').addEventListener('click', () => shopModal.style.display = 'none');
+        document.getElementById('close-missions').addEventListener('click', () => missionsModal.style.display = 'none');
+        document.getElementById('close-profile').addEventListener('click', () => profileModal.style.display = 'none');
+
+        // Wenn außerhalb des Modals geklickt wird, schließen
+        window.addEventListener('click', (event) => {
+            if (event.target === loginModal) loginModal.style.display = 'none';
+            if (event.target === registerModal) registerModal.style.display = 'none';
+            if (event.target === shopModal) shopModal.style.display = 'none';
+            if (event.target === missionsModal) missionsModal.style.display = 'none';
+            if (event.target === profileModal) profileModal.style.display = 'none';
+        });
+
+        // Button-Listener
+        document.getElementById('login-btn').addEventListener('click', () => {
+            loginModal.style.display = 'block';
+        });
+
+        document.getElementById('register-btn').addEventListener('click', () => {
+            registerModal.style.display = 'block';
+        });
+
+        document.getElementById('shop-btn').addEventListener('click', () => {
+            loadShopItems();
+            shopModal.style.display = 'block';
+        });
+
+        document.getElementById('missions-btn').addEventListener('click', () => {
+            loadDailyMissions();
+            missionsModal.style.display = 'block';
+        });
+
+        document.getElementById('profile-btn').addEventListener('click', () => {
+            loadUserProfile();
+            profileModal.style.display = 'block';
+        });
+
+        document.getElementById('logout-btn').addEventListener('click', logout);
+
+        // Formular-Listener
+        document.getElementById('login-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+            login();
+        });
+
+        document.getElementById('register-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+            register();
+        });
+
+        document.getElementById('change-password-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+            changePassword();
+        });
+
+        // Gast-Spiel starten
+        document.getElementById('play-button').addEventListener('click', function () {
+            const playerName = document.getElementById('player-name').value.trim();
+
+            if (!playerName) {
+                alert('Bitte gib einen Namen ein!');
+                return;
+            }
+
+            startGame(playerName);
+        });
+
+        // Benutzer-Spiel starten
+        document.getElementById('play-button-user').addEventListener('click', function () {
+            startGame(currentUser.username, true);
+        });
+
+        // Beim Laden der Seite prüfen, ob der Benutzer angemeldet ist
+        window.addEventListener('load', checkLoginStatus);
+
+        // Funktionen
+
+        // Login-Status prüfen
+        function checkLoginStatus() {
+            // Überprüfen, ob ein Login-Token im Local Storage vorhanden ist
+            const token = localStorage.getItem('tankio_token');
+
+            if (token) {
+                // Token an den Server senden, um die Gültigkeit zu überprüfen
+                fetch('auth_check.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ token }),
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Benutzer ist angemeldet
+                            currentUser = data.user;
+                            userCoins = data.coins;
+                            userUpgrades = data.upgrades;
+                            activeUpgrade = data.active_upgrade;
+
+                            // UI aktualisieren
+                            updateUIForLoggedInUser();
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Fehler beim Überprüfen des Login-Status:', error);
+                    });
+            }
+        }
+
+        // Login-Funktion
+        function login() {
+            const username = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+            const spinner = document.getElementById('login-spinner');
+            const errorElement = document.getElementById('login-error');
+
+            // Validierung
+            if (!username || !password) {
+                errorElement.textContent = 'Bitte fülle alle Felder aus.';
+                errorElement.style.display = 'block';
+                return;
+            }
+
+            // Spinner anzeigen
+            spinner.style.display = 'block';
+            errorElement.style.display = 'none';
+
+            // Anfrage an den Server senden
+            fetch('login.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    username,
+                    password
+                }),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    spinner.style.display = 'none';
+
+                    if (data.success) {
+                        // Login erfolgreich
+                        localStorage.setItem('tankio_token', data.token);
+                        currentUser = data.user;
+                        userCoins = data.coins;
+                        userUpgrades = data.upgrades;
+                        activeUpgrade = data.active_upgrade;
+
+                        // UI aktualisieren
+                        updateUIForLoggedInUser();
+
+                        // Modal schließen
+                        loginModal.style.display = 'none';
+
+                        // Formular zurücksetzen
+                        document.getElementById('login-form').reset();
+                    } else {
+                        // Login fehlgeschlagen
+                        errorElement.textContent = data.message || 'Login fehlgeschlagen. Bitte überprüfe deine Eingaben.';
+                        errorElement.style.display = 'block';
+                    }
+                })
+                .catch(error => {
+                    spinner.style.display = 'none';
+                    errorElement.textContent = 'Ein Fehler ist aufgetreten. Bitte versuche es später erneut.';
+                    errorElement.style.display = 'block';
+                    console.error('Fehler beim Login:', error);
+                });
+        }
+
+        // Registrierungs-Funktion
+        function register() {
+            const username = document.getElementById('register-username').value;
+            const password = document.getElementById('register-password').value;
+            const passwordConfirm = document.getElementById('register-password-confirm').value;
+            const spinner = document.getElementById('register-spinner');
+            const errorElement = document.getElementById('register-error');
+            const successElement = document.getElementById('register-success');
+
+            // Validierung
+            if (!username || !password || !passwordConfirm) {
+                errorElement.textContent = 'Bitte fülle alle Felder aus.';
+                errorElement.style.display = 'block';
+                successElement.style.display = 'none';
+                return;
+            }
+
+            if (password !== passwordConfirm) {
+                errorElement.textContent = 'Die Passwörter stimmen nicht überein.';
+                errorElement.style.display = 'block';
+                successElement.style.display = 'none';
+                return;
+            }
+
+            // Spinner anzeigen
+            spinner.style.display = 'block';
+            errorElement.style.display = 'none';
+            successElement.style.display = 'none';
+
+            // Anfrage an den Server senden
+            fetch('register.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    username,
+                    password
+                }),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    spinner.style.display = 'none';
+
+                    if (data.success) {
+                        // Registrierung erfolgreich
+                        successElement.textContent = 'Registrierung erfolgreich! Du kannst dich jetzt anmelden.';
+                        successElement.style.display = 'block';
+
+                        // Formular zurücksetzen
+                        document.getElementById('register-form').reset();
+
+                        // Nach 2 Sekunden zum Login-Modal wechseln
+                        setTimeout(() => {
+                            registerModal.style.display = 'none';
+                            loginModal.style.display = 'block';
+                        }, 2000);
+                    } else {
+                        // Registrierung fehlgeschlagen
+                        errorElement.textContent = data.message || 'Registrierung fehlgeschlagen. Bitte versuche es mit einem anderen Benutzernamen.';
+                        errorElement.style.display = 'block';
+                    }
+                })
+                .catch(error => {
+                    spinner.style.display = 'none';
+                    errorElement.textContent = 'Ein Fehler ist aufgetreten. Bitte versuche es später erneut.';
+                    errorElement.style.display = 'block';
+                    console.error('Fehler bei der Registrierung:', error);
+                });
+        }
+
+        // Passwort ändern
+        function changePassword() {
+            const currentPassword = document.getElementById('current-password').value;
+            const newPassword = document.getElementById('new-password').value;
+            const newPasswordConfirm = document.getElementById('new-password-confirm').value;
+            const errorElement = document.getElementById('profile-error');
+            const successElement = document.getElementById('profile-success');
+
+            // Validierung
+            if (!currentPassword || !newPassword || !newPasswordConfirm) {
+                errorElement.textContent = 'Bitte fülle alle Felder aus.';
+                errorElement.style.display = 'block';
+                successElement.style.display = 'none';
+                return;
+            }
+
+            if (newPassword !== newPasswordConfirm) {
+                errorElement.textContent = 'Die neuen Passwörter stimmen nicht überein.';
+                errorElement.style.display = 'block';
+                successElement.style.display = 'none';
+                return;
+            }
+
+            // Anfrage an den Server senden
+            fetch('change_password.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + localStorage.getItem('tankio_token')
+                },
+                body: JSON.stringify({
+                    current_password: currentPassword,
+                    new_password: newPassword
+                }),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Passwort erfolgreich geändert
+                        successElement.textContent = 'Passwort erfolgreich geändert!';
+                        successElement.style.display = 'block';
+                        errorElement.style.display = 'none';
+
+                        // Formular zurücksetzen
+                        document.getElementById('change-password-form').reset();
+                    } else {
+                        // Änderung fehlgeschlagen
+                        errorElement.textContent = data.message || 'Passwortänderung fehlgeschlagen. Bitte überprüfe dein aktuelles Passwort.';
+                        errorElement.style.display = 'block';
+                        successElement.style.display = 'none';
+                    }
+                })
+                .catch(error => {
+                    errorElement.textContent = 'Ein Fehler ist aufgetreten. Bitte versuche es später erneut.';
+                    errorElement.style.display = 'block';
+                    successElement.style.display = 'none';
+                    console.error('Fehler bei der Passwortänderung:', error);
+                });
+        }
+
+        // Abmelden
+        function logout() {
+            // Token aus dem Local Storage entfernen
+            localStorage.removeItem('tankio_token');
+
+            // Benutzerdaten zurücksetzen
+            currentUser = null;
+            userCoins = 0;
+            userUpgrades = [];
+            activeUpgrade = null;
+
+            // UI aktualisieren
+            updateUIForLoggedOutUser();
+        }
+
+        // UI für angemeldeten Benutzer aktualisieren
+        function updateUIForLoggedInUser() {
+            guestArea.style.display = 'none';
+            userArea.style.display = 'block';
+            accountDisplay.style.display = 'flex';
+            coinsDisplay.style.display = 'flex';
+
+            usernameDisplay.textContent = 'Willkommen, ' + currentUser.username;
+            coinsAmount.textContent = userCoins;
+        }
+
+        // UI für abgemeldeten Benutzer aktualisieren
+        function updateUIForLoggedOutUser() {
+            guestArea.style.display = 'block';
+            userArea.style.display = 'none';
+            accountDisplay.style.display = 'none';
+            coinsDisplay.style.display = 'none';
+        }
+
+        // Shop-Items laden
+        function loadShopItems() {
+            const shopItemsContainer = document.getElementById('shop-items');
+            const errorElement = document.getElementById('shop-error');
+            const successElement = document.getElementById('shop-success');
+
+            // Fehler- und Erfolgsanzeigen zurücksetzen
+            errorElement.style.display = 'none';
+            if (successElement) successElement.style.display = 'none';
+
+            // Shop-Container leeren
+            shopItemsContainer.innerHTML = '<p>Lade Shop-Items...</p>';
+
+            // Token aus localStorage holen
+            const token = localStorage.getItem('tankio_token');
+            if (!token) {
+                errorElement.textContent = 'Du bist nicht angemeldet.';
+                errorElement.style.display = 'block';
+                return;
+            }
+
+            // Direkt Token als URL-Parameter übergeben
+            fetch('get_shop_items.php?token=' + encodeURIComponent(token))
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Netzwerkantwort nicht OK: ' + response.status);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        // Shop-Items anzeigen
+                        const items = data.items;
+
+                        shopItemsContainer.innerHTML = '';
+
+                        if (items.length === 0) {
+                            shopItemsContainer.innerHTML = '<p>Keine Shop-Items verfügbar.</p>';
+                            return;
+                        }
+
+                        items.forEach(item => {
+                            const owned = userUpgrades.some(upgrade => upgrade.id === item.id);
+                            const isActive = activeUpgrade && activeUpgrade.id === item.id;
+
+                            const itemElement = document.createElement('div');
+                            itemElement.className = `shop-item ${owned ? 'owned' : ''} ${isActive ? 'active' : ''}`;
+                            itemElement.innerHTML = `
+                        <h3>${item.name}</h3>
+                        <p>${item.description}</p>
+                        <div class="price">
+                            <i class="fas fa-coins" style="color: gold; margin-right: 5px;"></i>
+                            <span>${item.cost}</span>
+                        </div>
+                        <div class="actions">
+                            ${owned
+                                    ? (isActive
+                                        ? '<button class="regular-button secondary" disabled>Aktiv</button>'
+                                        : `<button class="regular-button" onclick="activateUpgrade(${item.id})">Aktivieren</button>`)
+                                    : `<button class="regular-button" onclick="purchaseUpgrade(${item.id})" ${userCoins < item.cost ? 'disabled' : ''}>Kaufen</button>`
+                                }
+                        </div>
+                    `;
+
+                            shopItemsContainer.appendChild(itemElement);
+                        });
+
+                    } else {
+                        // Fehler anzeigen
+                        errorElement.textContent = data.message || 'Fehler beim Laden der Shop-Items.';
+                        errorElement.style.display = 'block';
+                    }
+                })
+                .catch(error => {
+                    console.error('Fehler beim Laden der Shop-Items:', error);
+                    errorElement.textContent = 'Ein Fehler ist aufgetreten: ' + error.message;
+                    errorElement.style.display = 'block';
+                    shopItemsContainer.innerHTML = '';
+                });
+        }
+
+        // Upgrade kaufen
+        function purchaseUpgrade(upgradeId) {
+            const errorElement = document.getElementById('shop-error');
+            const successElement = document.getElementById('shop-success');
+
+            // Token aus localStorage holen
+            const token = localStorage.getItem('tankio_token');
+            if (!token) {
+                errorElement.textContent = 'Du bist nicht angemeldet.';
+                errorElement.style.display = 'block';
+                return;
+            }
+
+            // Anfrage an den Server senden mit Token als URL-Parameter
+            fetch(`purchase_upgrade.php?token=${encodeURIComponent(token)}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    upgrade_id: upgradeId
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Kauf erfolgreich
+                        successElement.textContent = 'Upgrade erfolgreich gekauft!';
+                        successElement.style.display = 'block';
+                        errorElement.style.display = 'none';
+
+                        // Benutzerdaten aktualisieren
+                        userCoins = data.new_coins;
+                        userUpgrades = data.upgrades;
+                        coinsAmount.textContent = userCoins;
+
+                        // Shop neu laden
+                        loadShopItems();
+                    } else {
+                        // Kauf fehlgeschlagen
+                        errorElement.textContent = data.message || 'Kauf fehlgeschlagen.';
+                        errorElement.style.display = 'block';
+                        successElement.style.display = 'none';
+                    }
+                })
+                .catch(error => {
+                    errorElement.textContent = 'Ein Fehler ist aufgetreten: ' + error.message;
+                    errorElement.style.display = 'block';
+                    successElement.style.display = 'none';
+                    console.error('Fehler beim Kauf:', error);
+                });
+        }
+
+        // Upgrade aktivieren
+        function activateUpgrade(upgradeId) {
+            const errorElement = document.getElementById('shop-error');
+            const successElement = document.getElementById('shop-success');
+
+            // Token aus localStorage holen
+            const token = localStorage.getItem('tankio_token');
+            if (!token) {
+                errorElement.textContent = 'Du bist nicht angemeldet.';
+                errorElement.style.display = 'block';
+                return;
+            }
+
+            // Anfrage an den Server senden mit Token als URL-Parameter
+            fetch(`activate_upgrade.php?token=${encodeURIComponent(token)}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    upgrade_id: upgradeId
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Aktivierung erfolgreich
+                        successElement.textContent = 'Upgrade erfolgreich aktiviert!';
+                        successElement.style.display = 'block';
+                        errorElement.style.display = 'none';
+
+                        // Benutzerdaten aktualisieren
+                        activeUpgrade = data.active_upgrade;
+
+                        // Shop neu laden
+                        loadShopItems();
+                    } else {
+                        // Aktivierung fehlgeschlagen
+                        errorElement.textContent = data.message || 'Aktivierung fehlgeschlagen.';
+                        errorElement.style.display = 'block';
+                        successElement.style.display = 'none';
+                    }
+                })
+                .catch(error => {
+                    errorElement.textContent = 'Ein Fehler ist aufgetreten: ' + error.message;
+                    errorElement.style.display = 'block';
+                    successElement.style.display = 'none';
+                    console.error('Fehler bei der Aktivierung:', error);
+                });
+        }
+
+        // Tägliche Missionen laden
+        function loadDailyMissions() {
+            const missionsContainer = document.getElementById('missions-container');
+            const errorElement = document.getElementById('missions-error');
+
+            // Missionen-Container leeren
+            missionsContainer.innerHTML = '<p>Lade Missionen...</p>';
+
+            // Token aus localStorage holen
+            const token = localStorage.getItem('tankio_token');
+            if (!token) {
+                errorElement.textContent = 'Du bist nicht angemeldet.';
+                errorElement.style.display = 'block';
+                missionsContainer.innerHTML = '';
+                return;
+            }
+
+            // Direkt Token als URL-Parameter übergeben
+            fetch('get_daily_missions.php?token=' + encodeURIComponent(token))
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Netzwerkantwort nicht OK: ' + response.status);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        // Missionen anzeigen
+                        dailyMissions = data.missions;
+
+                        missionsContainer.innerHTML = '';
+
+                        if (dailyMissions.length === 0) {
+                            missionsContainer.innerHTML = '<p>Keine täglichen Missionen verfügbar.</p>';
+                            return;
+                        }
+
+                        missionsContainer.innerHTML = `<p>Nächste Aktualisierung: ${data.next_update}</p>`;
+
+                        dailyMissions.forEach(mission => {
+                            const progress = mission.progress || 0;
+                            const target = mission.target || 1;
+                            const percentage = Math.min(100, Math.round((progress / target) * 100));
+                            const isComplete = percentage >= 100;
+
+                            const missionElement = document.createElement('div');
+                            missionElement.className = `mission-item ${isComplete ? 'mission-complete' : ''}`;
+                            missionElement.innerHTML = `
+                        <h3>${mission.description}</h3>
+                        <p>Fortschritt: ${progress}/${target}</p>
+                        <div class="mission-progress">
+                            <div class="mission-progress-bar" style="width: ${percentage}%"></div>
+                        </div>
+                        <div class="mission-reward">
+                            <i class="fas fa-coins" style="margin-right: 5px;"></i>
+                            <span>${mission.reward}</span>
+                        </div>
+                        ${isComplete && !mission.claimed
+                                    ? `<button class="regular-button" onclick="claimMissionReward(${mission.id})">Belohnung abholen</button>`
+                                    : (mission.claimed
+                                        ? '<span style="color: green;">Belohnung abgeholt</span>'
+                                        : '')
+                                }
+                    `;
+
+                            missionsContainer.appendChild(missionElement);
+                        });
+                    } else {
+                        // Fehler anzeigen
+                        errorElement.textContent = data.message || 'Fehler beim Laden der Missionen.';
+                        errorElement.style.display = 'block';
+                        missionsContainer.innerHTML = '';
+                    }
+                })
+                .catch(error => {
+                    console.error('Fehler beim Laden der Missionen:', error);
+                    errorElement.textContent = 'Ein Fehler ist aufgetreten: ' + error.message;
+                    errorElement.style.display = 'block';
+                    missionsContainer.innerHTML = '';
+                });
+        }
+
+        // Missionsbelohnung einfordern
+        function claimMissionReward(missionId) {
+            const errorElement = document.getElementById('missions-error');
+
+            // Token aus localStorage holen
+            const token = localStorage.getItem('tankio_token');
+            if (!token) {
+                errorElement.textContent = 'Du bist nicht angemeldet.';
+                errorElement.style.display = 'block';
+                return;
+            }
+
+            // Anfrage an den Server senden mit Token als URL-Parameter
+            fetch(`claim_mission_reward.php?token=${encodeURIComponent(token)}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    mission_id: missionId
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Belohnung erfolgreich eingefordert
+                        // Benutzerdaten aktualisieren
+                        userCoins = data.new_coins;
+                        coinsAmount.textContent = userCoins;
+
+                        // Missionen neu laden
+                        loadDailyMissions();
+                    } else {
+                        // Einforderung fehlgeschlagen
+                        errorElement.textContent = data.message || 'Einforderung fehlgeschlagen.';
+                        errorElement.style.display = 'block';
+                    }
+                })
+                .catch(error => {
+                    errorElement.textContent = 'Ein Fehler ist aufgetreten: ' + error.message;
+                    errorElement.style.display = 'block';
+                    console.error('Fehler bei der Einforderung:', error);
+                });
+        }
+
+        // Benutzerprofil laden
+        function loadUserProfile() {
+            // Token aus localStorage holen
+            const token = localStorage.getItem('tankio_token');
+            if (!token) {
+                // Profil nicht laden, wenn kein Token vorhanden ist
+                return;
+            }
+
+            document.getElementById('profile-username').textContent = currentUser ? currentUser.username : 'Nicht angemeldet';
+            document.getElementById('profile-coins').textContent = userCoins;
+            document.getElementById('profile-upgrades-count').textContent = userUpgrades.length;
+
+            // Abgeschlossene Missionen abrufen
+            fetch(`get_completed_missions_count.php?token=${encodeURIComponent(token)}`, {
+                method: 'GET'
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('profile-completed-missions').textContent = data.count;
+                    }
+                })
+                .catch(error => {
+                    console.error('Fehler beim Laden der abgeschlossenen Missionen:', error);
+                });
+        }
+
+        // Spiel starten (mit oder ohne Account)
+        function startGame(playerName, withAccount = false) {
+            let gameUrl = 'https://iogame-zelo.onrender.com/?name=' + encodeURIComponent(playerName);
+
+            // Wenn mit Account, Token und aktives Upgrade hinzufügen
+            if (withAccount && currentUser) {
+                gameUrl += '&token=' + encodeURIComponent(localStorage.getItem('tankio_token'));
+
+                // Aktives Upgrade hinzufügen, falls vorhanden
+                if (activeUpgrade) {
+                    gameUrl += '&upgrade=' + encodeURIComponent(activeUpgrade.code);
+                }
+            }
+
+            // Spiel öffnen
+            window.location.href = gameUrl;
+        }
+    </script>
+</body>
+
+</html>
