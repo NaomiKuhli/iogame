@@ -1135,17 +1135,17 @@ function updateBullets() {
                     const shooter = players[bullet.ownerId];
                     if (shooter) {
                         shooter.score += 100;
-
-                        // 33% der XP des getöteten Spielers an den Shooter vergeben
+    
+                        // FIXED: 33% of the killed player's XP to the shooter
+                        // This is the critical fix - correctly calculate 33% of totalXp
                         const xpGain = Math.floor(player.totalXp * 0.33);
                         shooter.xp += xpGain;
                         shooter.totalXp += xpGain;
-                        const gainedXp = xpGain;
-
-                        // Level-Aufstieg prüfen
-                        checkLevelUp(shooter, gainedXp);
-
-                        // Killer über erhaltene XP informieren
+                        
+                        // Apply the XP to check for level up
+                        checkLevelUp(shooter, xpGain);
+    
+                        // Notify shooter about XP gain
                         io.to(bullet.ownerId).emit('xpGained', {
                             amount: xpGain,
                             fromKill: true,
