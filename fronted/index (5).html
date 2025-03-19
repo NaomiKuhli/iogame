@@ -405,11 +405,47 @@
                 transform: rotate(360deg);
             }
         }
+
+        /* NEU: Erklärung Button */
+        .explanation-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px 15px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: all 0.2s;
+            width: 100px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .explanation-btn:hover {
+            background-color: #e9ecef;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .explanation-btn i {
+            font-size: 24px;
+            margin-bottom: 5px;
+            color: #0087ff;
+        }
     </style>
 </head>
 
 <body>
     <div class="container">
+        <!-- NEU: Erklärung Button -->
+        <div class="explanation-btn" id="explanation-btn">
+            <i class="fas fa-question-circle"></i>
+            <span>Erklärung</span>
+        </div>
+
         <!-- Haupt-Menü -->
         <div class="menu">
             <h1>Tank.io</h1>
@@ -638,6 +674,11 @@
         });
 
         document.getElementById('logout-btn').addEventListener('click', logout);
+
+        // NEU: Erklärung Button Event Listener
+        document.getElementById('explanation-btn').addEventListener('click', () => {
+            window.location.href = 'https://nm-web.de/erklärung.html';
+        });
 
         // Formular-Listener
         document.getElementById('login-form').addEventListener('submit', function (e) {
